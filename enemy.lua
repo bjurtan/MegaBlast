@@ -27,12 +27,10 @@ function new_enemy(enemy_type)
         type = enemy_type,
         direction_y = 0, -- 0=none, 1=up, 2=down
         direction_x = 0, -- 0=none, 1=left, 2=right
-        next_direction = (math.random()*6), -- direction change time mark
+        next_direction = (math.random()*6+1), -- direction change time mark
         next_shot = (math.random()*3), -- shot time mark
-        pos_x = (math.random()*love.graphics.getWidth()), -- position on x plane
-        --pos_y = (math.random()*(love.graphics.getHeight()/2)+20), -- position on y plane
+        pos_x = (math.random()*screenWidth), -- position on x plane
         pos_y = -32,
-        --state = 2 -- 0=dead 1=dying 2=alive
         dead = false,
         explosion = 0,
         next_explosion = 0
@@ -180,7 +178,7 @@ function enemy_update(dt)
             -- check if enemies are colliding
             ---------------------------------------------------------------------------------
             -- THIS NEEDS TO BE OPTIMEXED! RIGHT NOW EACH ENEMY IS LOOPED OVER TWICE AS    --
-            -- THE OUTER LOOP (i) AND INNER LOOP BELOW (j) ROLLS THOUGH THE RANDOM CHANGE  --
+            -- THE OUTER LOOP (i) AND INNER LOOP (j) ROLLS THOUGH THE RANDOM CHANGE        --
             -- OF DIRECTION FOR BOTHE COLIDING ENEMIES ARE DUPLICATED AND RANDOMIZED.      --
             -- IN AN IDEAL SCHENARIO ENEMIES ARE ITERATED ONE AND THE DIRECTION CHANGE IS  --
             -- NOT RANDOMIZED BUT RATHER INVERTED.                                         --
@@ -192,17 +190,35 @@ function enemy_update(dt)
             -- collision detection in one go, without excessive iteration over the same data.
             for j=1,#enemies do
                 if i~=j then
+                    --if enemies[i].pos_x < enemies[j].pos_x + enemies[j].width and
+                    --enemies[i].pos_x + enemies[i].width > enemies[j].pos_x and
+                    --enemies[i].pos_y < enemies[j].pos_y + enemies[j].height and
+                    --enemies[i].pos_y + enemies[i].height > enemies[j].pos_y then
+                    --    enemies[i].next_direction = 0
+                    --end
                     if enemies[i].pos_x < enemies[j].pos_x + enemies[j].width and
-                    enemies[i].pos_x + enemies[i].width > enemies[j].pos_x and
-                    enemies[i].pos_y < enemies[j].pos_y + enemies[j].height and
+                    enemies[i].pos_x + enemies[i].width > enemies[j].pos_x then
+                        if enemies[i].direction_x == 1 then
+                            enemies[i].direction_x = -1
+                            enemies[i].pos_x = enemies[i].pos_x - 2
+                        else
+                            enemies[i].direction_x = 1
+                            enemies[i].pos_x = enemies[i].pos_x + 2
+                        end
+                    if enemies[i].pos_y < enemies[j].pos_y + enemies[j].height and
                     enemies[i].pos_y + enemies[i].height > enemies[j].pos_y then
-                        -- change direction on both enemies
-                        enemies[i].next_direction = 0
-                        enemies[j].next_direction = 0
+                        if enemies[i].direction_y == 1 then
+                            enemies[i].direction_y = -1
+                            enemies[i].pos_y = enemies[i].pos_y - 2
+                        else
+                            enemies[i].direction_y = 1
+                            enemies[i].pos_y = enemies[i].pos_y + 2
+                        end
                     end
                 end
             end
         end
+    end
     else -- else crete some enemies
         -- TODO: create enemies
     end

@@ -84,12 +84,16 @@ function love.load(arg)
     --screenWidth = 1024
     --screenHeight = screenWidth * screenRatio
     screenRatio = love.graphics.getPixelWidth() / love.graphics.getPixelHeight()
-    screenHeight = 600
+    screenHeight = 480
     screenWidth = screenHeight * screenRatio
 
     --scale = love.graphics.getWidth() / screenWidth
     --scale = love.graphics.getPixelHeight() / screenHeight
     screenScale = love.graphics.getHeight() / screenHeight
+
+    opening_music=love.audio.newSource("assets/ottos_rymdsong2.ogg", "static")
+    opening_music:setLooping(true)
+    love.audio.play(opening_music)
 
     starfield_init()
     menu_init()

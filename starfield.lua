@@ -13,10 +13,6 @@ function starfield_init()
     star2 = love.graphics.newImage("assets/star2.png")
     star3 = love.graphics.newImage("assets/star3.png")  
 
-    opening_music=love.audio.newSource("assets/ottos_rymdsong2.ogg", "static")
-    opening_music:setLooping(true)
-    love.audio.play(opening_music)
-    
     -- Set star field star count
     nStars1 = 60
     nStars2 = 40
