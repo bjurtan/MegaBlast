@@ -12,6 +12,7 @@ function game_init()
         over=false,
         ended=0,
         score=0,
+        level=1,
         kills_enemy1=0,
         kills_enemy2=0,
         kills_enemy3=0,
@@ -28,9 +29,9 @@ function game_init()
         max_enemies=10,
         next_level=100,
         next_difficulty=1,
-        next_rf_powerup=love.timer.getTime()+(math.random()*30+30), -- rapid fire powerup
-        next_sb_powerup=love.timer.getTime()+(math.random()*30+30), -- speed boost powerup
-        next_shield_powerup=love.timer.getTime()+(math.random()*40+40), -- shield powerup
+        next_rf_powerup=love.timer.getTime()+(math.random()*40+40), -- rapid fire powerup
+        next_sb_powerup=love.timer.getTime()+(math.random()*40+40), -- speed boost powerup
+        next_shield_powerup=love.timer.getTime()+(math.random()*50+50), -- shield powerup
         scale=1,  -- graphics scaling coeficient
     }
 
@@ -231,6 +232,10 @@ function draw_hud()
 
     -- restore colors
     love.graphics.setColor(r, g, b, a)
+
+    -- print screen and canvas size
+    love.graphics.print("screenWidth: "..screenWidth, 10, 20)
+    love.graphics.print("pixelWidth: "..love.graphics.getPixelWidth(), 10, 40)
 end
 
 

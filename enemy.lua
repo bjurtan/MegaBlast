@@ -62,7 +62,7 @@ end
 
 function enemy_shoot(enemy)
     
-    -- if enemy is dead if cannot shoot
+    -- if enemy is dead it cannot shoot
     if enemy.dead == false then
         -- local storage for new shot
         local _shot = {

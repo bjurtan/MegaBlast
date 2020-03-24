@@ -79,16 +79,13 @@ function love.load(arg)
 	--effect = moonshine(moonshine.effects.filmgrain).chain(moonshine.effects.vignette)
 	effect = moonshine(moonshine.effects.fastgaussianblur)
 
-
-    --screenRatio = love.graphics.getHeight() / love.graphics.getWidth()
-    --screenWidth = 1024
-    --screenHeight = screenWidth * screenRatio
-    screenRatio = love.graphics.getPixelWidth() / love.graphics.getPixelHeight()
+    pixelWidth = love.graphics.getPixelWidth()
+    pixelHeight = love.graphics.getPixelHeight()
+    screenRatio = pixelWidth / pixelHeight
     screenHeight = 480
-    screenWidth = screenHeight * screenRatio
-
-    --scale = love.graphics.getWidth() / screenWidth
-    --scale = love.graphics.getPixelHeight() / screenHeight
+    -- calculate screenWidth based on screenHeigh adn ration but make sure to round down to an even integer.
+    -- This is done by subtracting the modulus of height*ration and 2 from the actual height * ratio.
+    screenWidth = screenHeight * screenRatio - (screenHeight * screenRatio % 2)
     screenScale = love.graphics.getHeight() / screenHeight
 
     opening_music=love.audio.newSource("assets/ottos_rymdsong2.ogg", "static")
@@ -152,7 +149,11 @@ function love.draw(dt)
         	game_draw()
     	end
     	
-    	love.graphics.pop() -- Restor graphics after scaling
+        love.graphics.pop() -- Restor graphics after scaling
+        -- does not work. All windows active (at least on window) are resized
+        -- when the screen resolution changes. When the game exists and the
+        -- screen resolution is restored all open windows are small and placed
+        -- at the top lect corner. SUPE ANOYING!!
 
     end)
 
