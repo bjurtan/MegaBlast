@@ -1,5 +1,5 @@
 # PikoPixel assets (.piko)
-*.piko
+# *.piko
 
 # Compiled Lua sources
 luac.out
