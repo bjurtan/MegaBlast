@@ -25,8 +25,8 @@ function new_enemy(enemy_type)
     -- TODO: Implement new enemy function
     local _enemy = {
         type = enemy_type,
-        direction_y = 0, -- 0=none, 1=up, 2=down
-        direction_x = 0, -- 0=none, 1=left, 2=right
+        direction_y = 1, -- 0=none, 1=down, -1=up
+        direction_x = 0, -- 0=none, 1=right, -1=left
         next_direction = (math.random()*6+1), -- direction change time mark
         next_shot = (math.random()*3), -- shot time mark
         pos_x = (math.random()*screenWidth), -- position on x plane
