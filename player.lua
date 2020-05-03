@@ -94,7 +94,7 @@ function player_shoot()
             blast2.height = 10
             blast2.velocity = (math.random()*50)+300
             table.insert(player.blasts, blast2)
-            -- shot 2
+            -- shot 3
             local blast3 = {}
             blast3.pos_x = player.pos_x + 38
             blast3.pos_y = player.pos_y + 2
