@@ -263,6 +263,7 @@ function game_draw()
         end
 
         draw_hud()
+        love.mouse.setVisible(false)
 
     end
 end

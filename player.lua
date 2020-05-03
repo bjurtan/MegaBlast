@@ -3,33 +3,52 @@
 -------------------------------------------------------------------
 -- init player
 -------------------------------------------------------------------
-function player_init()
-        
-    player = {} -- new table/dict to hold player data and assign it tot variable player
+function player_init(selected_ship)
+    
+    player = {} -- new table/dict to hold player data and assign it to variable player
 
     player.dead = false
     player.explosion = 0
     player.next_explosion = 0
-    player.image = love.graphics.newImage("assets/player2.png")
-    player.pos_x = screenWidth / 2
-    player.pos_y = screenHeight / 1.2
-    player.width = player.image:getWidth()   -- for collition detection etc
-    player.height = player.image:getHeight()
-    player.speed = 200 -- pixels per second
-    player.speed_booster_powerup_expiration=0
-    player.rate_of_fire = 0.2 -- 0.2 = 5 blasts /second. Upgrades available later in game?
+    player.pos_x = screenWidth
+    player.pos_y = screenHeight
+    player.speed = 200 -- pixels per second used when keyboard controls player. Not used now.
+    player.speed_booster_powerup_expiration=0 -- has no effect on game. Maybe change to slow down game speed?
+    player.rate_of_fire = 0.2 -- 0.2 = 5 blasts /second. Rapid fire upgrades available during gameplay.
     player.rapid_fire_powerup_expiration=0
     player.shield = false
     player.shield_image = love.graphics.newImage("assets/player_shield.png")
     player.last_shot = love.timer.getTime()
-    player.collision_box = { {22,22,6,4}, {0,0,36,6} }
     player.blasts = {}
+
+    if selected_ship == 1 then
+        player.ship = "Raptor"
+        player.image = love.graphics.newImage("assets/player2.png") -- selected ship
+        player.collision_box = { {22,22,6,4}, {0,0,36,6} }
+        player.width = player.image:getWidth()
+        player.height = player.image:getHeight()
+    elseif selected_ship == 2 then
+        player.ship = "Wildfly"
+        player.image = love.graphics.newImage("assets/otto3.png") -- selected ship
+        player.collision_box = { {22,22,6,4}, {0,0,36,6} }
+        player.width = player.image:getWidth()
+        player.height = player.image:getHeight()
+    elseif selected_ship == 3 then
+        player.ship = "Rex"
+        player.image = love.graphics.newImage("assets/frans.png") -- selected ship
+        player.collision_box = { {22,22,6,4}, {0,0,36,6} }
+        player.width = player.image:getWidth()
+        player.height = player.image:getHeight()
+    end
 
     blast_image = love.graphics.newImage("assets/player_blast.png")
     blast_sound = love.audio.newSource("assets/Laser_Shoot3.wav", "static")
     player_hit_sound = love.audio.newSource("assets/player_hit.wav", "static")
 
     -- uses explosion1-4 from enemy.lua
+
+    -- move mouse cursor->player ship to starting position
+    love.mouse.setPosition(player.pos_x, player.pos_y)
     
 end
 
@@ -43,12 +62,54 @@ function player_shoot()
     if _shot > (player.last_shot + player.rate_of_fire) then
         player.last_shot = _shot
         local blast = {}
-        blast.pos_x = player.pos_x + 23 -- player width / 2 - blast width / 2
-        blast.pos_y = player.pos_y
-        blast.width = 8
-        blast.height = 10
-        blast.velocity = (math.random()*50)+300
-        table.insert(player.blasts, blast)
+        if player.ship == "Wildfly" then
+            -- shot 1
+            blast.pos_x = player.pos_x + 3
+            blast.pos_y = player.pos_y + 20
+            blast.width = 8
+            blast.height = 10
+            blast.velocity = (math.random()*50)+300
+            table.insert(player.blasts, blast)
+            -- shot 2
+            local blast2 = {}
+            blast2.pos_x = player.pos_x + 43
+            blast2.pos_y = player.pos_y + 20
+            blast2.width = 8
+            blast2.height = 10
+            blast2.velocity = (math.random()*50)+300
+            table.insert(player.blasts, blast2)
+        elseif player.ship == "Rex" then
+            -- shot 1
+            blast.pos_x = player.pos_x + 10
+            blast.pos_y = player.pos_y + 2
+            blast.width = 8
+            blast.height = 10
+            blast.velocity = (math.random()*50)+300
+            table.insert(player.blasts, blast)
+            -- shot 2
+            local blast2 = {}
+            blast2.pos_x = player.pos_x + 23
+            blast2.pos_y = player.pos_y -5
+            blast2.width = 8
+            blast2.height = 10
+            blast2.velocity = (math.random()*50)+300
+            table.insert(player.blasts, blast2)
+            -- shot 2
+            local blast3 = {}
+            blast3.pos_x = player.pos_x + 38
+            blast3.pos_y = player.pos_y + 2
+            blast3.width = 8
+            blast3.height = 10
+            blast3.velocity = (math.random()*50)+300
+            table.insert(player.blasts, blast3)
+        else
+            blast.pos_x = player.pos_x + 23 -- player width / 2 - blast width / 2
+            blast.pos_y = player.pos_y - 4
+            blast.width = 8
+            blast.height = 10
+            blast.velocity = (math.random()*50)+300
+            table.insert(player.blasts, blast)
+        end
         blast_sound:stop()
         blast_sound:play()
     end
@@ -113,26 +174,6 @@ function player_update(dt)
         -- player still alive
         local _now = love.timer.getTime()
 
-        -- checking keyboard player keyboard input.
-        --[[
-        if love.keyboard.isDown("right") then
-            player.pos_x = player.pos_x + (player.speed * dt)
-        end
-        if love.keyboard.isDown("left") then
-            player.pos_x = player.pos_x - (player.speed * dt)
-        end
-        if love.keyboard.isDown("up") then
-            player.pos_y = player.pos_y - (player.speed * dt)
-        end
-        if love.keyboard.isDown("down") then
-            player.pos_y = player.pos_y + (player.speed * dt)
-        end
-        -- did player shoot?
-        if love.keyboard.isDown("space") then
-            player_shoot()        
-        end
-        ]]
-
         -- check mouse position
         player.pos_x, player.pos_y = love.mouse.getPosition()
         player.pos_x = player.pos_x / screenScale - 27
@@ -143,7 +184,7 @@ function player_update(dt)
         end
         
         -- check touch position
-        --[[
+        --[[ love.touch not needed? love.mouse seems to work just fine for touch.
         local _touches = love.touch.getTouches()
         for i, id in ipairs(_touches) do
             player.pos_x, player.pos_y = love.touch.getPosition(id)
