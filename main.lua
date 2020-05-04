@@ -21,15 +21,13 @@ buffer = love.graphics.newCanvas(screenWidth, screenHeight)
 -------------------------------------------------------------------
 function love.keypressed(key)
     if key == 'escape' then
-        if game.menu then
+        if menu.active then
             love.event.push('quit')
         elseif game.over then
-            game.menu=true
+            menu.active=true
             game.over=false
-            game_init()
-            enemy_init()
         else
-            game.menu = true
+            menu.active = true
         end
     end
 end
@@ -37,6 +35,7 @@ end
 -------------------------------------------------------------------
 -- callback mousepressed
 -------------------------------------------------------------------
+--[[
 function love.mousepressed(x, y, button, istouch)
     if game.over then
         game.over = false
@@ -45,14 +44,15 @@ function love.mousepressed(x, y, button, istouch)
         --player_init()
     end
 end
+]]
 
 -------------------------------------------------------------------
 -- callback touchpressed
 -------------------------------------------------------------------
 --[[
 function love.touchpressed(id, x, y, dx, dy, pressure)
-    if game.menu then
-        game.menu = false
+    if menu.active then
+        menu.active = false
         player_init()
     elseif game.over then
         game.over = false
@@ -83,11 +83,13 @@ function love.load(arg)
 
     starfield_init()
     menu_init()
-    game_init()
-    enemy_init()
-    player_init()
     --highscore_init()
 
+    -- Initialization of game, player and enemies shpud happen after player selecgts ship in menu
+    --game_init()
+    --enemy_init()
+    --player_init()
+    
 end
 
 -------------------------------------------------------------------
@@ -96,7 +98,7 @@ end
 function love.update(dt)
     -- takes dt (delta time = time since last update).
     starfield_update(dt)
-    if game.menu then
+    if menu.active then
        menu_update(dt) 
     else
         game_update(dt) -- update game states.
@@ -125,7 +127,7 @@ function love.draw(dt)
     love.graphics.scale(screenScale, screenScale)
     
     starfield_draw(dt)
-    if game.menu then
+    if menu.active then
         menu_draw(dt)
     else
         player_draw()

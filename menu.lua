@@ -12,6 +12,7 @@ function menu_init()
     }
 
     menu = {
+        active = true,
         title = "MEGABLAST",
         description = "A galactic space shooter game by F.O.B.S (c) 2020 Frans | Otto | Björn | Sara",
         text = "Select your ship and press play..",
@@ -94,7 +95,9 @@ function menu_update(dt)
         mouse.pos_y > menu.play_button.pos_y and
         mouse.pos_y < menu.play_button.pos_y + menu.play_button.height then
             -- start game and pass selected ship to game
-            game.menu = false
+            menu.active = false
+            game_init()
+            enemy_init()
             player_init(menu.selected) -- send selected ship
         end
     end

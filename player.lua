@@ -21,6 +21,21 @@ function player_init(selected_ship)
     player.last_shot = love.timer.getTime()
     player.blasts = {}
 
+    --[[
+        player collision boxes
+
+        Each player can have multiple collision boxes. Each box is made up of four
+        elements, each of which represents the number of pixels from the edge.
+
+        The first element in the list/array is the number of pixels inward from the
+        left most edge of the player image (+). The second element in the list is the
+        number of pixels inward from the right edge of the player image (-). the third
+        element is the number of pixels from the top edge and the last is the numer of
+        pixels from the bottom edge.
+
+        The collision detection code using these boxes is in enemy.lua and the
+        enemy_shots_update() function.
+    ]]
     if selected_ship == 1 then
         player.ship = "Raptor"
         player.image = love.graphics.newImage("assets/player2.png") -- selected ship
@@ -30,13 +45,13 @@ function player_init(selected_ship)
     elseif selected_ship == 2 then
         player.ship = "Wildfly"
         player.image = love.graphics.newImage("assets/otto3.png") -- selected ship
-        player.collision_box = { {22,22,6,4}, {0,0,36,6} }
+        player.collision_box = { {24,24,2,8}, {18,18,15,6}, {7,7,28,10} }
         player.width = player.image:getWidth()
         player.height = player.image:getHeight()
     elseif selected_ship == 3 then
         player.ship = "Rex"
         player.image = love.graphics.newImage("assets/frans.png") -- selected ship
-        player.collision_box = { {22,22,6,4}, {0,0,36,6} }
+        player.collision_box = { {21,21,3,12}, {10,32,10,6}, {32,10,10,6}, {4,4,37,6} }
         player.width = player.image:getWidth()
         player.height = player.image:getHeight()
     end

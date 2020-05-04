@@ -2,9 +2,28 @@
 
 
 ----------------------------------------------------------
+-- global objects
+----------------------------------------------------------
+game = {}       -- global game object later initialized.
+powerups = {}   -- global powerup object later initialized
+
+
+----------------------------------------------------------
+-- global handler for mouse press events used simply to
+-- exit back to menu after game is over. Ignore all other
+-- mouse events as those are handled elsewhere.
+----------------------------------------------------------
+function love.mousepressed(x, y, button, istouch)
+    if game.over then
+        game.over = false
+        menu.active = true
+    end
+end
+
+
+----------------------------------------------------------
 -- game_init
 ----------------------------------------------------------
-
 function game_init()
 
     -- create game object
@@ -19,7 +38,6 @@ function game_init()
         kills_enemy4=0,
         kills_enemy5=0,
         bonus=0,
-        menu=true,
         enemy_spawn=3,
         enemy_speed=1,          -- enemy speed factor used to make all enemies move faster as game progresses
         enemy_rate_of_fire=1,   -- enemy rate of fire factor used to make all enemies fire faster
@@ -44,12 +62,10 @@ function game_init()
 end
 
 
+
 ----------------------------------------------------------
 -- keeping track of powerups
 ----------------------------------------------------------
-
-powerups = {}
-
 function new_powerup(t)
     -- local powerup variable
     local _powerup = {
@@ -127,11 +143,11 @@ end
 ----------------------------------------------------------
 -- game_update
 ----------------------------------------------------------
-
 function game_update(dt)
 
     -- if game is not in menu
-    if game.menu==false then
+    if menu.active==false then
+
         -- get current time
         local _now = love.timer.getTime()
         -- check number of enemies to maximum
@@ -202,6 +218,9 @@ function game_update(dt)
 end
 
 
+----------------------------------------------------------
+-- draw_hud
+----------------------------------------------------------
 function draw_hud()
     
     -- save original colors
@@ -239,6 +258,9 @@ function draw_hud()
 end
 
 
+----------------------------------------------------------
+-- draw_game
+----------------------------------------------------------
 function game_draw()
     local _now = love.timer.getTime()
     if game.over and (game.ended < _now + 2) then -- check game.ended

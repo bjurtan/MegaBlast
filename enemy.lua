@@ -103,20 +103,14 @@ function enemy_shots_update(dt)
 
         -- check for collision with player by looping through the collision boxes and checking
         -- if enemy shot is within the player collision box edges. Note that the collision_box
-        -- is a 2x2 array because there can be multiple collision boxes. [][]
+        -- is a 2 dimensional array because there can be multiple collision boxes. [][]
         for j=1,#player.collision_box do
             if enemy_fire[i].pos_x + enemy_fire[i].width > player.pos_x + player.collision_box[j][1] and
             enemy_fire[i].pos_x < player.pos_x + player.width - player.collision_box[j][2] and
             enemy_fire[i].pos_y + enemy_fire[i].height > player.pos_y + player.collision_box[j][3] and
             enemy_fire[i].pos_y < player.pos_y + player.height - player.collision_box[j][4] then
-                -- not a good design
-                --if player.sheild == true then
-                --    player.shield = false
-                --else
-                --    player.dead = true
-                --end
-                player_hit()
-                table.insert(_enemy_shot_remove, i)
+                player_hit() -- handles stuff like shield power depletion and player death
+                table.insert(_enemy_shot_remove, i) -- remove enemy shot hitting player
             end
         end
 
