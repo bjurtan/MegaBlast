@@ -14,7 +14,6 @@ function player_init(selected_ship)
     player.pos_y = screenHeight
     player.speed = 200 -- pixels per second used when keyboard controls player. Not used now.
     player.speed_booster_powerup_expiration=0 -- has no effect on game. Maybe change to slow down game speed?
-    player.rate_of_fire = 0.2 -- 0.2 = 5 blasts /second. Rapid fire upgrades available during gameplay.
     player.rapid_fire_powerup_expiration=0
     player.shield = false
     player.shield_image = love.graphics.newImage("assets/player_shield.png")
@@ -27,14 +26,15 @@ function player_init(selected_ship)
         Each player can have multiple collision boxes. Each box is made up of four
         elements, each of which represents the number of pixels from the edge.
 
-        The first element in the list/array is the number of pixels inward from the
-        left most edge of the player image (+). The second element in the list is the
-        number of pixels inward from the right edge of the player image (-). the third
-        element is the number of pixels from the top edge and the last is the numer of
-        pixels from the bottom edge.
+        A player with two collosion boxes would look like this: {{a,b,c,d},{a,b,c,d}}
+
+            a=pixels right of lext most player image edge (pos_x+a)
+            b=pixels right of left mos player imgage edge (pos_x+width-b)
+            c=pixels down from upper player image edge (pos_y+c)
+            d=pixels up from bottom eplayer imagedge (pos_y+height-d)
 
         The collision detection code using these boxes is in enemy.lua and the
-        enemy_shots_update() function.
+        enemy_blasts_update() function.
     ]]
     if selected_ship == 1 then
         player.ship = "Raptor"
@@ -42,18 +42,21 @@ function player_init(selected_ship)
         player.collision_box = { {22,22,6,4}, {0,0,36,6} }
         player.width = player.image:getWidth()
         player.height = player.image:getHeight()
+        player.rate_of_fire = 0.2 -- 0.2 = 5 blasts /second. Rapid fire upgrades available during gameplay.
     elseif selected_ship == 2 then
         player.ship = "Wildfly"
         player.image = love.graphics.newImage("assets/otto3.png") -- selected ship
         player.collision_box = { {24,24,2,8}, {18,18,15,6}, {7,7,28,10} }
         player.width = player.image:getWidth()
         player.height = player.image:getHeight()
+        player.rate_of_fire = 0.25 -- 0.2 = 5 blasts /second. Rapid fire upgrades available during gameplay.
     elseif selected_ship == 3 then
         player.ship = "Rex"
         player.image = love.graphics.newImage("assets/frans.png") -- selected ship
         player.collision_box = { {21,21,3,12}, {10,32,10,6}, {32,10,10,6}, {4,4,37,6} }
         player.width = player.image:getWidth()
         player.height = player.image:getHeight()
+        player.rate_of_fire = 0.3 -- 0.2 = 5 blasts /second. Rapid fire upgrades available during gameplay.
     end
 
     blast_image = love.graphics.newImage("assets/player_blast.png")
@@ -160,6 +163,7 @@ function player_update_blasts(dt)
                     player.blasts[i].pos_y + player.blasts[i].height > enemies[j].pos_y + enemies[j].collision_box[k][3] and
                     player.blasts[i].pos_y < enemies[j].pos_y + enemies[j].height - enemies[j].collision_box[k][4] then
                         enemies[j].dead = true
+                        game.kills = game.kills + 1
                         game.score = game.score + enemies[j].points
                         player_hit_sound:stop()
                         player_hit_sound:play()

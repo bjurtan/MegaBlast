@@ -1,15 +1,21 @@
 -- FILE: enemy.lua
 
--- init
+
+
+--------------------------------------------------------------------------------
+-- enemy_init()
+--------------------------------------------------------------------------------
+-- This function initialized enemy assets.
+--------------------------------------------------------------------------------
 function enemy_init()
     
     enemies = {} -- enemies table
-    enemy_fire = {} -- enemy fire table
+    enemy_blasts = {} -- enemy fire table
 
     enemy1_img = love.graphics.newImage("assets/enemy1.png")
     enemy2_img = love.graphics.newImage("assets/enemy4.png")
 
-    enemy1_shot_img = love.graphics.newImage("assets/enemy_shot1.png")
+    enemy1_shot_img = love.graphics.newImage("assets/enemy_blast.png")
 
     explosion1 = love.graphics.newImage("assets/explosion1.png")
     explosion2 = love.graphics.newImage("assets/explosion2.png")
@@ -19,15 +25,22 @@ function enemy_init()
 end
 
 
--- new enemy
+--------------------------------------------------------------------------------
+-- new_enemy()
+--------------------------------------------------------------------------------
+-- The function will create and immediately spawn a new enemy in the game.
+-- the function will decide depending on game state such as score, level
+-- etc choose the next enemy type and spawn a new enemy of selected type.
+--------------------------------------------------------------------------------
 function new_enemy(enemy_type)
 
-    -- TODO: Implement new enemy function
+    -- TODO: function decides enemy type inline
+
     local _enemy = {
         type = enemy_type,
         direction_y = 1, -- 0=none, 1=down, -1=up
         direction_x = 0, -- 0=none, 1=right, -1=left
-        next_direction = (math.random()*6+1), -- direction change time mark
+        next_direction = (math.random()*6+3), -- direction change time mark
         next_shot = (math.random()*3), -- shot time mark
         pos_x = (math.random()*screenWidth), -- position on x plane
         pos_y = -32,
@@ -72,62 +85,62 @@ function enemy_shoot(enemy)
 
         -- modify local shot depending on enemy type shooting
         if enemy.type == 1 then
-            _shot.velocity = (math.random()*50)+200*game.enemy_shot_velocity
+            _shot.velocity = (math.random()*50)+200*game.enemy_blast_velocity
             _shot.image = enemy1_shot_img
             _shot.width = _shot.image:getWidth()
             _shot.height = _shot.image:getHeight()
         elseif enemy.type == 2 then
-            _shot.velocity = (math.random()*50)+100*game.enemy_shot_velocity
+            _shot.velocity = (math.random()*50)+100*game.enemy_blast_velocity
             _shot.image = enemy1_shot_img
             _shot.width = _shot.image:getWidth()
             _shot.height = _shot.image:getHeight()
         end
 
-        -- add _shot to enemy_fire{}
-        table.insert(enemy_fire, _shot)
+        -- add _shot to enemy_blasts{}
+        table.insert(enemy_blasts, _shot)
     end
 end
 
 
-function enemy_shots_update(dt)
+function enemy_blasts_update(dt)
 
-    local _enemy_shot_remove = {}
+    local _enemy_blast_remove = {}
 
-    for i=1,#enemy_fire do
-        enemy_fire[i].pos_y = enemy_fire[i].pos_y + (enemy_fire[i].velocity * dt)
+    for i=1,#enemy_blasts do
+        enemy_blasts[i].pos_y = enemy_blasts[i].pos_y + (enemy_blasts[i].velocity * dt)
 
-        -- check if enemy shot passes screen bounds
-        if enemy_fire[i].pos_y > love.graphics.getHeight() then
-            table.insert(_enemy_shot_remove, i)
+        -- check if enemy blast passes screen bounds
+        if enemy_blasts[i].pos_y > love.graphics.getHeight() then
+            table.insert(_enemy_blast_remove, i)
         end
 
         -- check for collision with player by looping through the collision boxes and checking
-        -- if enemy shot is within the player collision box edges. Note that the collision_box
+        -- if enemy blast is within the player collision box edges. Note that the collision_box
         -- is a 2 dimensional array because there can be multiple collision boxes. [][]
         for j=1,#player.collision_box do
-            if enemy_fire[i].pos_x + enemy_fire[i].width > player.pos_x + player.collision_box[j][1] and
-            enemy_fire[i].pos_x < player.pos_x + player.width - player.collision_box[j][2] and
-            enemy_fire[i].pos_y + enemy_fire[i].height > player.pos_y + player.collision_box[j][3] and
-            enemy_fire[i].pos_y < player.pos_y + player.height - player.collision_box[j][4] then
+            if enemy_blasts[i].pos_x + enemy_blasts[i].width > player.pos_x + player.collision_box[j][1] and
+            enemy_blasts[i].pos_x < player.pos_x + player.width - player.collision_box[j][2] and
+            enemy_blasts[i].pos_y + enemy_blasts[i].height > player.pos_y + player.collision_box[j][3] and
+            enemy_blasts[i].pos_y < player.pos_y + player.height - player.collision_box[j][4] then
                 player_hit() -- handles stuff like shield power depletion and player death
-                table.insert(_enemy_shot_remove, i) -- remove enemy shot hitting player
+                table.insert(_enemy_blast_remove, i) -- remove enemy shot hitting player
             end
         end
 
-        -- check for enemy shot collision with other enemies
+        -- check for enemy blast collision with other enemies
         --[[ for j=1,#enemies do
-            if enemy_fire[i].pos_x + enemy_fire[i].width > enemies[j].pos_x and
-            enemy_fire[i].pos_x < enemies[j].pos_x + enemies[j].width and
-            enemy_fire[i].pos_y + enemy_fire[i].height > enemies[j].pos_y and
-            enemy_fire[i].pos_y < enemies[j].pos_y + enemies[j].height then
+            if enemy_blasts[i].pos_x + enemy_blasts[i].width > enemies[j].pos_x and
+            enemy_blasts[i].pos_x < enemies[j].pos_x + enemies[j].width and
+            enemy_blasts[i].pos_y + enemy_blasts[i].height > enemies[j].pos_y and
+            enemy_blasts[i].pos_y < enemies[j].pos_y + enemies[j].height then
                 enemies[j].dead = true
-                table.insert(_enemy_shot_remove, i)
+                table.insert(_enemy_blast_remove, i)
             end
         end ]]
     end
 
-    for i=1,#_enemy_shot_remove do -- loop through player_blast indexs to be removed
-        table.remove(enemy_fire, _enemy_shot_remove[i]) -- ..and remove them from the table
+    for i=1,#_enemy_blast_remove do -- loop through player_blast indexs to be removed
+        table.remove(enemy_blasts, _enemy_blast_remove[i]) -- ..and remove them from the table
     end
 end
 
@@ -170,26 +183,15 @@ function enemy_update(dt)
                 enemies[i].direction_y = -1
             end
             -- check if enemies are colliding
-            ---------------------------------------------------------------------------------
-            -- THIS NEEDS TO BE OPTIMEXED! RIGHT NOW EACH ENEMY IS LOOPED OVER TWICE AS    --
-            -- THE OUTER LOOP (i) AND INNER LOOP (j) ROLLS THOUGH THE RANDOM CHANGE        --
-            -- OF DIRECTION FOR BOTHE COLIDING ENEMIES ARE DUPLICATED AND RANDOMIZED.      --
-            -- IN AN IDEAL SCHENARIO ENEMIES ARE ITERATED ONE AND THE DIRECTION CHANGE IS  --
-            -- NOT RANDOMIZED BUT RATHER INVERTED.                                         --
-            ---------------------------------------------------------------------------------
-            -- hmmmm
-            -- In the future I will implement a proper collision detection system using box
-            -- and circle colliders for each game entity (player, eneies, blasts etc) and have
-            -- each entity put its collisioon box data in a global table that will perform all
-            -- collision detection in one go, without excessive iteration over the same data.
             for j=1,#enemies do
                 if i~=j then
-                    --if enemies[i].pos_x < enemies[j].pos_x + enemies[j].width and
-                    --enemies[i].pos_x + enemies[i].width > enemies[j].pos_x and
-                    --enemies[i].pos_y < enemies[j].pos_y + enemies[j].height and
-                    --enemies[i].pos_y + enemies[i].height > enemies[j].pos_y then
-                    --    enemies[i].next_direction = 0
-                    --end
+                    --[[
+                        The random direction change of simply setting next_direction to 0
+                        did not work well. Enemies were cycling collisions and direction
+                        changes making them "shake" on screen. Now, we simply invert the
+                        direction of the colliding enemies and also force jump the change
+                        by adding (or subtracting) two from colliding position axis.
+                    ]]
                     if enemies[i].pos_x < enemies[j].pos_x + enemies[j].width and
                     enemies[i].pos_x + enemies[i].width > enemies[j].pos_x then
                         if enemies[i].direction_x == 1 then
@@ -214,9 +216,9 @@ function enemy_update(dt)
         end
     end
     else -- else crete some enemies
-        -- TODO: create enemies
+        --new_enemy(1)
     end
-    enemy_shots_update(dt)
+    enemy_blasts_update(dt)
 end
 
 
@@ -283,9 +285,9 @@ function enemy_draw(dt)
     end
 
     -- draw enemy shots
-    if #enemy_fire > 0 then
-        for i=1,#enemy_fire do
-            love.graphics.draw(enemy_fire[i].image, enemy_fire[i].pos_x, enemy_fire[i].pos_y)
+    if #enemy_blasts > 0 then
+        for i=1,#enemy_blasts do
+            love.graphics.draw(enemy_blasts[i].image, enemy_blasts[i].pos_x, enemy_blasts[i].pos_y)
         end
     end
 

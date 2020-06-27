@@ -26,31 +26,27 @@ end
 ----------------------------------------------------------
 function game_init()
 
-    -- create game object
+    -- initialize game properties
     game = {
         over=false,
         ended=0,
         score=0,
         level=1,
-        kills_enemy1=0,
-        kills_enemy2=0,
-        kills_enemy3=0,
-        kills_enemy4=0,
-        kills_enemy5=0,
+        kills=0,
         bonus=0,
-        enemy_spawn=3,
+        enemy_spawn=3,          -- remove and use enemy types per level
         enemy_speed=1,          -- enemy speed factor used to make all enemies move faster as game progresses
         enemy_rate_of_fire=1,   -- enemy rate of fire factor used to make all enemies fire faster
-        enemy_shot_velocity=1,  -- enemy show velocity factor used t make all enemy shots move faster
+        enemy_blast_velocity=1, -- enemy show velocity factor used t make all enemy shots move faster
         next_enemy=0,
-        next_enemy_type=1,
+        next_enemy_type=1,      -- 1=scout, 2=fighter, 3=bomber, 4=commanders, 5=megablaster
         max_enemies=10,
         next_level=100,
         next_difficulty=1,
         next_rf_powerup=love.timer.getTime()+(math.random()*40+40), -- rapid fire powerup
         next_sb_powerup=love.timer.getTime()+(math.random()*40+40), -- speed boost powerup
         next_shield_powerup=love.timer.getTime()+(math.random()*50+50), -- shield powerup
-        scale=1,  -- graphics scaling coeficient
+        scale=4,  -- graphics scaling coeficient. NOT USED?
     }
 
     rapid_fire_powerup_image = love.graphics.newImage("assets/rapid_fire_powerup.png")
@@ -59,6 +55,8 @@ function game_init()
     cup_powerup_image = love.graphics.newImage("assets/cup_powerup.png")
     powerup_sound = love.audio.newSource("assets/tada.wav", "static")
 
+    -- init levels
+    level_init()
 end
 
 
@@ -148,11 +146,19 @@ function game_update(dt)
     -- if game is not in menu
     if menu.active==false then
 
+        -- check if it is time to progress levels
+        level_update()
+
         -- get current time
         local _now = love.timer.getTime()
+
         -- check number of enemies to maximum
+        --if #enemies < game.max_enemies then
         if #enemies < game.max_enemies then
             if _now > game.next_enemy then
+
+                -- TODO: Move this code to levels.lus and call from here
+
                 -- decide what type of enemy based on score, randomness etc
                 -- then spawn new enemy and insert in enemies table/list
                 --[[if game.score > 100 then
@@ -168,28 +174,30 @@ function game_update(dt)
             end
         end
 
-        -- check if time for powerups
-        if game.next_rf_powerup < _now then
-            -- if previous powerup has not expired we do not need another
-            --if player.rapid_fire_powerup_expiration == 0 then
-            table.insert(powerups, new_powerup("rf"))
-            --end
-            game.next_rf_powerup = love.timer.getTime()+(math.random()*30+30)
-        end
-        if game.next_sb_powerup < _now then
-            --if player.speed_booster_powerup_expiration == 0 then
-            table.insert(powerups, new_powerup("sb"))
-            --end
-            game.next_sb_powerup = love.timer.getTime()+(math.random()*30+30)
-        end
-        if game.next_shield_powerup < _now then
-            -- check if player allready has shield and if so send cup/bonus instead
-            if player.shield == true then
-                table.insert(powerups, new_powerup("cup"))
-            else
-                table.insert(powerups, new_powerup("shield"))
+        -- unless player is dead, check if time for powerups
+        if player.dead == false then
+            if game.next_rf_powerup < _now then
+                -- if previous powerup has not expired we do not need another
+                --if player.rapid_fire_powerup_expiration == 0 then
+                table.insert(powerups, new_powerup("rf"))
+                --end
+                game.next_rf_powerup = love.timer.getTime()+(math.random()*30+30)
             end
-            game.next_shield_powerup = love.timer.getTime()+(math.random()*40+40)
+            if game.next_sb_powerup < _now then
+                --if player.speed_booster_powerup_expiration == 0 then
+                table.insert(powerups, new_powerup("sb"))
+                --end
+                game.next_sb_powerup = love.timer.getTime()+(math.random()*30+30)
+            end
+            if game.next_shield_powerup < _now then
+                -- check if player allready has shield and if so send cup/bonus instead
+                if player.shield == true then
+                    table.insert(powerups, new_powerup("cup"))
+                else
+                    table.insert(powerups, new_powerup("shield"))
+                end
+                game.next_shield_powerup = love.timer.getTime()+(math.random()*40+40)
+            end
         end
         
         -- update powerups (if there are some)
@@ -197,6 +205,7 @@ function game_update(dt)
             update_powerups(dt)
         end
 
+        -- TODO: move level code to levels.lua and call it
         if game.score > game.next_level then
             game.next_level = game.next_level + (math.random()*25)*25
             -- make game more diccifult over time
@@ -209,7 +218,7 @@ function game_update(dt)
             elseif game.next_difficulty == 4 then
                 game.enemy_rate_of_fire = game.enemy_rate_of_fire - 1
             elseif game.next_difficulty == 5 then
-                game.enemy_shot_velocity = game.enemy_shot_velocity + 0.1
+                game.enemy_blast_velocity = game.enemy_blast_velocity + 0.1
             end
             game.next_difficulty = game.next_difficulty + 1
             if game.next_difficulty == 6 then game.next_difficulty = 1 end
@@ -252,9 +261,22 @@ function draw_hud()
     -- restore colors
     love.graphics.setColor(r, g, b, a)
 
+    local _now = love.timer.getTime()
+    if game.over and (game.ended < _now + 2) then -- check game.ended
+        
+        love.graphics.setFont(title_font)
+        love.graphics.print("Game Over", screenWidth/3.6, 200)
+        love.graphics.setFont(main_font)
+        love.graphics.print("Your score: "..game.score, screenWidth/2.4, 300)
+        love.graphics.print("MOUSE BUTTON or ESC to return to menu..",100, 500)
+    end
+
     -- print screen and canvas size
-    love.graphics.print("screenWidth: "..screenWidth, 10, 20)
-    love.graphics.print("pixelWidth: "..love.graphics.getPixelWidth(), 10, 40)
+    --love.graphics.print("screenWidth: "..screenWidth, 10, 20)
+    --love.graphics.print("pixelWidth: "..love.graphics.getPixelWidth(), 10, 40)
+
+    love.graphics.print(levels.enemies, 10, 20)
+    
 end
 
 
@@ -262,15 +284,7 @@ end
 -- draw_game
 ----------------------------------------------------------
 function game_draw()
-    local _now = love.timer.getTime()
-    if game.over and (game.ended < _now + 2) then -- check game.ended
-        love.graphics.setFont(title_font)
-        love.graphics.print("Game Over", screenWidth/3.6, 200)
-        love.graphics.setFont(main_font)
-        love.graphics.print("Your score: "..game.score, screenWidth/2.4, 300)
-        love.graphics.print("MOUSE BUTTON or ESC to return to menu..",100, 500)
-    else
-
+    if game.over == false then -- check game.ended
         -- draw powerups
         for i=1,#powerups do
             if powerups[i].type=="rf" then
@@ -284,7 +298,6 @@ function game_draw()
             end
         end
 
-        draw_hud()
         love.mouse.setVisible(false)
 
     end
