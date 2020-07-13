@@ -14,7 +14,7 @@ require "game"          -- game logic, score, level etc
 require "levels"        -- level properties, game lopp update, change etc
 require "player"        -- player object, state variables and functions
 require "enemy"         -- enemy object, state variables and functions
-require "shaders"       -- shader code to be sent to GPU and stuff
+-- require "shaders"       -- shader code to be sent to GPU and stuff
 
 buffer = love.graphics.newCanvas(screenWidth, screenHeight)
 
@@ -85,8 +85,8 @@ function love.load(arg)
     opening_music:setLooping(true)
     love.audio.play(opening_music)
 
-    -- init various parts of tyhe game
-    shader.init()
+    -- init various parts of the game
+    -- shader.init()
     starfield_init()
     menu_init()
     --highscore_init()
@@ -137,20 +137,16 @@ function love.draw(dt)
     if menu.active then
         menu_draw(dt)
     else
-        shader.apply()
+        -- shader.apply()
         player_draw()
         enemy_draw()
         game_draw()
-        shader.remove()
+        -- shader.remove()
         draw_hud()
 
     end
     
     love.graphics.pop() -- Restore graphics after scaling
-    -- does not work. All windows active (at least on window) are resized
-    -- when the screen resolution changes. When the game exists and the
-    -- screen resolution is restored all open windows are small and placed
-    -- at the top lect corner. SUPE ANOYING!!
 
     -- draw screen resolution and fps
     --love.graphics.print("Resolution: " .. love.graphics.getPixelWidth() .. "*" .. love.graphics.getPixelHeight() .. " | Scale: " .. scale, 10, 20)

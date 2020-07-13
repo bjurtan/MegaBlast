@@ -16,9 +16,9 @@ function level_init()
     
     --[[
         Initialize level 1. Subsequent levels will be generated on the fly
-        based on fixes incremets and some randomization of paramaters..
+        based on fixed incremets and some randomization of paramaters..
 
-        each level is addedd to levels table.insert(levels, _level)
+        Each level is addedd to levels table.insert(levels, _level)
         game.level can be used as an index to table levels[game.level]
         setting game.level can be done by game.level=#levels
     ]]
@@ -28,7 +28,7 @@ function level_init()
     levels.fighters =     { 0, 8,10,16,16, 0, 0, 0, 0,10, 6, 6, 6, 2, 0, 0, 0, 4, 0, 0, 0, 0, 0,30,10}
     levels.bombers =      { 0, 0, 0, 4, 8, 0, 0, 0, 0, 0, 6, 6, 6, 2, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0}
     levels.commanders =   { 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 6, 6, 6, 2, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0}
-    levels.megablasters = { 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 6, 6, 6, 2, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0}
+    levels.megablasters = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     
     levels.enemies = levels.scouts[game.level] + levels.fighters[game.level] + levels.bombers[game.level] + levels.commanders[game.level] + levels.megablasters[game.level]
 

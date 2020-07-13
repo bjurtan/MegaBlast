@@ -157,7 +157,7 @@ function game_update(dt)
         if #enemies < game.max_enemies then
             if _now > game.next_enemy then
 
-                -- TODO: Move this code to levels.lus and call from here
+                -- TODO: Move this code to levels.lua and call from here
 
                 -- decide what type of enemy based on score, randomness etc
                 -- then spawn new enemy and insert in enemies table/list
