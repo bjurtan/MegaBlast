@@ -97,6 +97,7 @@ function menu_update(dt)
             -- start game and pass selected ship to game
             menu.active = false
             game_init()
+            level_init()
             enemy_init()
             player_init(menu.selected) -- send selected ship
         end

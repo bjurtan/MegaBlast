@@ -14,7 +14,7 @@ require "game"          -- game logic, score, level etc
 require "levels"        -- level properties, game lopp update, change etc
 require "player"        -- player object, state variables and functions
 require "enemy"         -- enemy object, state variables and functions
--- require "shaders"       -- shader code to be sent to GPU and stuff
+--require "shaders"       -- shader code to be sent to GPU and stuff
 
 buffer = love.graphics.newCanvas(screenWidth, screenHeight)
 
@@ -76,25 +76,24 @@ function love.load(arg)
     pixelHeight = love.graphics.getPixelHeight()
     screenRatio = pixelWidth / pixelHeight
     screenHeight = 480
+    
     -- calculate screenWidth based on screenHeigh adn ration but make sure to round down to an even integer.
     -- This is done by subtracting the modulus of height*ration and 2 from the actual height * ratio.
     screenWidth = screenHeight * screenRatio - (screenHeight * screenRatio % 2)
     screenScale = love.graphics.getHeight() / screenHeight
-
+    
     opening_music=love.audio.newSource("assets/ottos_rymdsong2.ogg", "static")
     opening_music:setLooping(true)
     love.audio.play(opening_music)
 
+    -- seed the rng
+    math.randomseed(os.time())
+    
     -- init various parts of the game
-    -- shader.init()
+    --shader.init()
     starfield_init()
     menu_init()
     --highscore_init()
-
-    -- Initialization of game, player and enemies shpud happen after player selecgts ship in menu
-    --game_init()
-    --enemy_init()
-    --player_init()
     
 end
 
@@ -102,6 +101,10 @@ end
 -- Update
 -------------------------------------------------------------------
 function love.update(dt)
+
+    -- get current time
+    now = love.timer.getTime()
+
     -- takes dt (delta time = time since last update).
     starfield_update(dt)
     if menu.active then
@@ -137,19 +140,25 @@ function love.draw(dt)
     if menu.active then
         menu_draw(dt)
     else
-        -- shader.apply()
+        --shader.apply()
         player_draw()
         enemy_draw()
         game_draw()
-        -- shader.remove()
+        --shader.remove()
         draw_hud()
 
     end
-    
-    love.graphics.pop() -- Restore graphics after scaling
 
-    -- draw screen resolution and fps
-    --love.graphics.print("Resolution: " .. love.graphics.getPixelWidth() .. "*" .. love.graphics.getPixelHeight() .. " | Scale: " .. scale, 10, 20)
+    -- draw screen resolution etc
+    love.graphics.print("Resolution: " .. love.graphics.getPixelWidth() .. "*" .. love.graphics.getPixelHeight() .. " | Scale: " .. screenScale .. " | Ratio: " .. screenRatio, 10, 20)
+    love.graphics.print("ScreenWidth: " .. screenWidth .. " ScreenHeight: " .. screenHeight, 10, 40)
+    if game.level then
+        love.graphics.print("Level: " .. game.level .. " Kills: " ..game.kills, 10, 70)
+        love.graphics.print("Player x: "..player.pos_x, 10, 80)
+        love.graphics.print("Player y: "..player.pos_y, 10, 90)
+    end
+
+    love.graphics.pop() -- Restore graphics after scaling
 
     love.graphics.setCanvas()
     love.graphics.draw(buffer)

@@ -44,28 +44,35 @@ function new_enemy(enemy_type)
         next_shot = (math.random()*3), -- shot time mark
         pos_x = (math.random()*screenWidth), -- position on x plane
         pos_y = -32,
+        collision = false,
         dead = false,
         explosion = 0,
         next_explosion = 0
     }
 
-    if enemy_type == 1 then
-        _enemy.speed = 100
-        _enemy.rate_of_fire = 0.5
-        _enemy.image = enemy1_img
-        _enemy.width = _enemy.image:getWidth()
-        _enemy.height = _enemy.image:getHeight()
+    if enemy_type == 1 then -- scout
+        _enemy.speed = 80
+        _enemy.rate_of_fire = 0.6
+        _enemy.width = enemy1_img:getWidth()
+        _enemy.height = enemy1_img:getHeight()
         _enemy.points = 20
         _enemy.collision_box = {{14,14,3,0},{0,0,24,4}}
-    elseif enemy_type == 2 then
+    elseif enemy_type == 2 then -- fighter
+        _enemy.speed = 100
+        _enemy.pos_y = -64
+        _enemy.rate_of_fire = 0.4
+        _enemy.width = enemy2_img:getWidth()
+        _enemy.height = enemy2_img:getHeight()
+        _enemy.points = 25
+        _enemy.collision_box= {{7,7,20,40},{14,14,40,20},{20,20,50,4}}
+    else -- megablast
         _enemy.speed = 50
         _enemy.pos_y = -64
-        _enemy.rate_of_fire = 1
-        _enemy.image = enemy2_img
-        _enemy.width = _enemy.image:getWidth()
-        _enemy.height = _enemy.image:getHeight()
-        _enemy.points = 25
-        _enemy.collision_box = {{7,7,20,40},{14,14,40,20},{20,20,50,4}}
+        _enemy.rate_of_fire = 5
+        _enemy.width = enemy5_img:getWidth()
+        _enemy.height = enemy5_img:getHeight()
+        _enemy.points = 400
+        _enemy.collision_box= {{7,7,20,40},{14,14,40,20},{20,20,50,4}}
     end
 
     return _enemy
@@ -90,7 +97,7 @@ function enemy_shoot(enemy)
             _shot.width = _shot.image:getWidth()
             _shot.height = _shot.image:getHeight()
         elseif enemy.type == 2 then
-            _shot.velocity = (math.random()*50)+100*game.enemy_blast_velocity
+            _shot.velocity = (math.random()*50)+200*game.enemy_blast_velocity
             _shot.image = enemy1_shot_img
             _shot.width = _shot.image:getWidth()
             _shot.height = _shot.image:getHeight()
@@ -145,31 +152,55 @@ function enemy_blasts_update(dt)
 end
 
 
-
--- update enemy
 function enemy_update(dt)
+
+    local _enemy_distance = {}
+
     -- if enemies, cycle through enemies and update beahavior for each
     if #enemies > 0 then
 
-        -- get current time
-        local _now = love.timer.getTime()
-
         -- iterate over enemies
         for i=1,#enemies do
+            -- check if enemies are colliding
+            for j=1,#enemies do
+                if i~=j then
+                    -- check distance between enemies i (outer loop) and j (inner loop)
+                    local _distance_x = math.abs(enemies[i].pos_x+enemies[i].width/2 - enemies[j].pos_x+enemies[j].width/2)
+                    local _distance_y = math.abs(enemies[i].pos_y+enemies[i].height/2 - enemies[j].pos_y+enemies[j].height/2)
+                    local _distance = math.abs(math.sqrt(_distance_x ^ 2 + _distance_y ^ 2))
+                    if _distance < 128 then
+                        local middle_x, middle_y = screenWidth/2, screenHeight/2
+                        local i_x = enemies[i].pos_x+enemies[i].width/2
+                        local i_y = enemies[i].pos_y+enemies[i].height/2
+                        local j_x = enemies[j].pos_x+enemies[j].width/2
+                        local j_y = enemies[j].pos_y+enemies[j].height/2
+                        local dis_i = math.abs(math.sqrt(math.abs(i_x-middle_x)^2+math.abs(i_y-middle_y)^2))
+                        local dis_j = math.abs(math.sqrt(math.abs(j_x-middle_x)^2+math.abs(j_y-middle_y)^2))
+                        if dis_i > dis_j then
+                            if enemies[i].collision == false then
+                                enemies[i].direction_x = enemies[i].direction_x * -1
+                                enemies[i].direction_y = enemies[j].direction_y * -1
+                                enemies[i].collision = true
+                                print("collision: i="..i)
+                            end
+                        else
+                            if enemies[j].collision == false then
+                                enemies[j].direction_x = enemies[j].direction_x * -1
+                                enemies[j].direction_y = enemies[j].direction_y * -1
+                                enemies[j].collision = true
+                                print("collision: j="..j)
+                            end
+                        end
+                    else
+                        enemies[i].collision = false
+                    end
+                end
+            end
             -- check if it is time for enemy to shoot
-            if enemies[i].next_shot < _now and player.dead~= true then
+            if enemies[i].next_shot < now and player.dead~= true then
                 enemy_shoot(enemies[i])
                 enemies[i].next_shot = love.timer.getTime() + (math.random()*3+enemies[i].rate_of_fire*game.enemy_rate_of_fire)
             end
-            -- check if it is time for direction change
-            if enemies[i].next_direction < _now then
-                enemies[i].direction_x = (math.random()*2)-1
-                enemies[i].direction_y = (math.random()*2)-1
-                enemies[i].next_direction = love.timer.getTime() + (math.random()*6)
-            end
-            -- update position
-            enemies[i].pos_x = enemies[i].pos_x + enemies[i].speed * game.enemy_speed * enemies[i].direction_x * dt
-            enemies[i].pos_y = enemies[i].pos_y + enemies[i].speed * game.enemy_speed * enemies[i].direction_y * dt
             -- check if enemy position is outside screen bounds on x axis
             if enemies[i].pos_x < 0 then
                 enemies[i].direction_x = 1
@@ -182,45 +213,22 @@ function enemy_update(dt)
             elseif enemies[i].pos_y + enemies[i].height > (screenHeight - screenHeight/3) then
                 enemies[i].direction_y = -1
             end
-            -- check if enemies are colliding
-            for j=1,#enemies do
-                if i~=j then
-                    --[[
-                        The random direction change of simply setting next_direction to 0
-                        did not work well. Enemies were cycling collisions and direction
-                        changes making them "shake" on screen. Now, we simply invert the
-                        direction of the colliding enemies and also force jump the change
-                        by adding (or subtracting) two from colliding position axis.
-                    ]]
-                    if enemies[i].pos_x < enemies[j].pos_x + enemies[j].width and
-                    enemies[i].pos_x + enemies[i].width > enemies[j].pos_x then
-                        if enemies[i].direction_x == 1 then
-                            enemies[i].direction_x = -1
-                            enemies[i].pos_x = enemies[i].pos_x - 2
-                        else
-                            enemies[i].direction_x = 1
-                            enemies[i].pos_x = enemies[i].pos_x + 2
-                        end
-                    if enemies[i].pos_y < enemies[j].pos_y + enemies[j].height and
-                    enemies[i].pos_y + enemies[i].height > enemies[j].pos_y then
-                        if enemies[i].direction_y == 1 then
-                            enemies[i].direction_y = -1
-                            enemies[i].pos_y = enemies[i].pos_y - 2
-                        else
-                            enemies[i].direction_y = 1
-                            enemies[i].pos_y = enemies[i].pos_y + 2
-                        end
-                    end
-                end
+            -- check if it is time for direction change
+            if enemies[i].next_direction < now then
+                --math.randomseed(os.time())
+                --enemies[i].direction_x = love.math.random(-1, 1)
+                --enemies[i].direction_y = love.math.random(-1, 1)
+                enemies[i].direction_x = math.random()*2-1
+                enemies[i].direction_y = math.random()*2-1
+                enemies[i].next_direction = love.timer.getTime() + (math.random()*6+6)
             end
+            -- update position
+            enemies[i].pos_x = enemies[i].pos_x + enemies[i].speed * game.enemy_speed * enemies[i].direction_x * dt
+            enemies[i].pos_y = enemies[i].pos_y + enemies[i].speed * game.enemy_speed * enemies[i].direction_y * dt
         end
-    end
-    else -- else crete some enemies
-        --new_enemy(1)
     end
     enemy_blasts_update(dt)
 end
-
 
 
 function enemy_draw(dt)
@@ -228,7 +236,6 @@ function enemy_draw(dt)
     if #enemies > 0 then
         -- enemy is dead, create table to hold enemies to be removed
         local _enemies_remove = {}
-        local _now = love.timer.getTime()
 
         -- for each enemy 
         for i=1,#enemies do
@@ -236,27 +243,27 @@ function enemy_draw(dt)
             if enemies[i].dead == true then                    
                 -- check which explosion image to draw
                 if enemies[i].explosion == 0 then
-                    if _now > enemies[i].next_explosion then
+                    if now > enemies[i].next_explosion then
                         enemies[i].explosion = 1
-                        enemies[i].next_explosion = (_now + 0.1)
+                        enemies[i].next_explosion = (now + 0.1)
                     end
                     love.graphics.draw(explosion1, enemies[i].pos_x, enemies[i].pos_y)
                 elseif enemies[i].explosion == 1 then
-                    if _now > enemies[i].next_explosion then
+                    if now > enemies[i].next_explosion then
                         enemies[i].explosion = 2
-                        enemies[i].next_explosion = (_now + 0.1)
+                        enemies[i].next_explosion = (now + 0.1)
                     end
                     love.graphics.draw(explosion2, enemies[i].pos_x, enemies[i].pos_y)
                 elseif enemies[i].explosion == 2 then
-                    if _now > enemies[i].next_explosion then
+                    if now > enemies[i].next_explosion then
                         enemies[i].explosion = 3
-                        enemies[i].next_explosion = (_now + 0.1)
+                        enemies[i].next_explosion = (now + 0.1)
                     end
                     love.graphics.draw(explosion3, enemies[i].pos_x, enemies[i].pos_y)
                 elseif enemies[i].explosion == 3 then
-                    if _now > enemies[i].next_explosion then
+                    if now > enemies[i].next_explosion then
                         enemies[i].explosion = 4
-                        enemies[i].next_explosion = (_now + 0.1)
+                        enemies[i].next_explosion = (now + 0.1)
                     end
                     love.graphics.draw(explosion4, enemies[i].pos_x, enemies[i].pos_y)
                 elseif enemies[i].explosion == 4 then
@@ -264,22 +271,16 @@ function enemy_draw(dt)
                     table.insert(_enemies_remove, i)
                 end
             else
-                love.graphics.draw(enemies[i].image, enemies[i].pos_x, enemies[i].pos_y)
+                -- love.graphics.draw(enemies[i].image, enemies[i].pos_x, enemies[i].pos_y)
+                if enemies[i].type == 1 then
+                    love.graphics.draw(enemy1_img, enemies[i].pos_x, enemies[i].pos_y)
+                elseif enemies[i].type == 2 then
+                    love.graphics.draw(enemy2_img, enemies[i].pos_x, enemies[i].pos_y)
+                end
             end
         end
         -- remove dead exploded enemies
         for i=1,#_enemies_remove do
-        --    if enemies[_enemies_remove[i]].type ==1 then
-        --        game.kills_enemy1 = game.kills_enemy1+1
-        --    elseif enemies[_enemies_remove[i]].type == 2 then
-        --        game.kills_enemy2 = game.kills_enemy2+1
-        --    elseif enemies[_enemies_remove[i]].type == 3 then
-        --        game.kills_enemy3 = game.kills_enemy3+1
-        --    elseif enemies[_enemies_remove[i]].type == 4 then
-        --        game.kills_enemy4 = game.kills_enemy4+1
-        --    elseif enemies[_enemies_remove[i]].type == 5 then
-        --        game.kills_enemy5 = game.kills_enemy5+1
-        --    end
             table.remove(enemies, _enemies_remove[i])
         end
     end

@@ -190,9 +190,6 @@ function player_update(dt)
     -- is player alive?
     if player.dead==false then
 
-        -- player still alive
-        local _now = love.timer.getTime()
-
         -- check mouse position
         player.pos_x, player.pos_y = love.mouse.getPosition()
         player.pos_x = player.pos_x / screenScale - 27
@@ -226,14 +223,14 @@ function player_update(dt)
         end
     
         -- check powerup expiration
-        if player.rapid_fire_powerup_expiration~=0 and player.rapid_fire_powerup_expiration < _now then
+        if player.rapid_fire_powerup_expiration~=0 and player.rapid_fire_powerup_expiration < now then
             -- rapid fire powerup has expired
             player.rate_of_fire=player.rate_of_fire*2
             player.rapid_fire_powerup_expiration=0
         else
             -- draw powerup hud in game.lua
         end
-        if player.speed_booster_powerup_expiration~=0 and player.speed_booster_powerup_expiration < _now then
+        if player.speed_booster_powerup_expiration~=0 and player.speed_booster_powerup_expiration < now then
             -- rapid fire powerup has expired
             player.speed=player.speed/2
             player.speed_booster_powerup_expiration=0
@@ -272,37 +269,35 @@ end
 -------------------------------------------------------------------
 function player_draw()
 
-    local _now = love.timer.getTime()
-
     if player.dead then
         -- check which explosion image to draw
         if player.explosion == 0 then
-            if _now > player.next_explosion then
+            if now > player.next_explosion then
                 player.explosion = 1
-                player.next_explosion = (_now + 0.1)
+                player.next_explosion = (now + 0.1)
             end
             love.graphics.draw(explosion1, player.pos_x, player.pos_y)
         elseif player.explosion == 1 then
-            if _now > player.next_explosion then
+            if now > player.next_explosion then
                 player.explosion = 2
-                player.next_explosion = (_now + 0.1)
+                player.next_explosion = (now + 0.1)
             end
             love.graphics.draw(explosion2, player.pos_x, player.pos_y)
         elseif player.explosion == 2 then
-            if _now > player.next_explosion then
+            if now > player.next_explosion then
                 player.explosion = 3
-                player.next_explosion = (_now + 0.1)
+                player.next_explosion = (now + 0.1)
             end
             love.graphics.draw(explosion3, player.pos_x, player.pos_y)
         elseif player.explosion == 3 then
-            if _now > player.next_explosion then
+            if now > player.next_explosion then
                 player.explosion = 4
-                player.next_explosion = (_now + 0.1)
+                player.next_explosion = (now + 0.1)
             end
             love.graphics.draw(explosion4, player.pos_x, player.pos_y)
         elseif player.explosion == 4 then
             game.over=true
-            game.ended=_now
+            game.ended=now
         end
     else
         love.graphics.draw(player.image,player.pos_x,player.pos_y)

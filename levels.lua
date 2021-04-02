@@ -24,14 +24,13 @@ function level_init()
     ]]
 
     -- level:               1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
-    levels.scouts =       {20,12,10, 6, 4, 0, 0, 0, 0,10, 6, 6, 6, 2, 0, 0, 0, 4, 0, 0, 0, 0, 0,30,10}
-    levels.fighters =     { 0, 8,10,16,16, 0, 0, 0, 0,10, 6, 6, 6, 2, 0, 0, 0, 4, 0, 0, 0, 0, 0,30,10}
-    levels.bombers =      { 0, 0, 0, 4, 8, 0, 0, 0, 0, 0, 6, 6, 6, 2, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0}
-    levels.commanders =   { 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 6, 6, 6, 2, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0}
-    levels.megablasters = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    levels.scouts =       {10, 8, 6, 4, 2, 0, 0, 0, 0,10, 6, 6, 6, 2, 0, 0, 0, 4, 0, 0, 0, 0, 0,30,10}
+    levels.fighters =     { 0, 8,12,16,10, 0, 0, 0, 0,10, 6, 6, 6, 2, 0, 0, 0, 4, 0, 0, 0, 0, 0,30,10}
+    levels.bombers =      { 0, 0, 0, 4,10, 0, 0, 0, 0, 0, 6, 6, 6, 2, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0}
+    levels.cruisers =     { 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 6, 6, 6, 2, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0}
+    levels.megablasters = { 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
     
-    levels.enemies = levels.scouts[game.level] + levels.fighters[game.level] + levels.bombers[game.level] + levels.commanders[game.level] + levels.megablasters[game.level]
-
+    levels.enemies = levels.scouts[game.level] + levels.fighters[game.level] + levels.bombers[game.level] + levels.cruisers[game.level] + levels.megablasters[game.level]
 end
 
 
@@ -44,7 +43,12 @@ end
 function level_update()
 
     -- check if all enemies of the level has been destroyed
-
+    if game.kills == levels.enemies then
+        game.level = game.level + 1
+        game.kills = 0
+        -- TODO: if level progress past 25 (end of levels table) the game will crash
+        levels.enemies = levels.scouts[game.level] + levels.fighters[game.level] + levels.bombers[game.level] + levels.cruisers[game.level] + levels.megablasters[game.level]
+    end
 end
 
 ----------------------------------------------------------
@@ -57,8 +61,8 @@ end
 ----------------------------------------------------------
 function level_next()
 
-    -- time for next level, create new level and push onto
-    -- levels table and set game.level to #levels
+    -- som variables to control level progression animation
+
 
 end
 
