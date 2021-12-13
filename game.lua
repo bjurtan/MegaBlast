@@ -65,7 +65,7 @@ function new_powerup(t)
     local _powerup = {
         type=t,
         pos_x = -20,
-        pos_y=(math.random()*400)+100,
+        pos_y=(math.random()*300)+100,
         width=32,
         height=32,
         speed=100 * game.enemy_speed
@@ -86,6 +86,8 @@ function update_powerups(dt)
         powerups[i].pos_x = powerups[i].pos_x + powerups[i].speed * dt
 
         -- check for collision with enemies and make enemies change direction
+        -- is this needed? No
+        --[[
         for j=1,#enemies do
             if powerups[i].pos_x + powerups[i].width > enemies[j].pos_x and
             powerups[i].pos_x < enemies[j].pos_x + enemies[j].width and
@@ -94,6 +96,7 @@ function update_powerups(dt)
                 enemies[j].next_direction = 0
             end
         end
+        ]]
 
         -- check collision with player
         if powerups[i].pos_x + powerups[i].width > player.pos_x and
@@ -108,7 +111,7 @@ function update_powerups(dt)
                 player.speed_booster_powerup_expiration=love.timer.getTime()+10
                 player.speed=player.speed*2
             elseif powerups[i].type=="shield" then
-                player.shield=true
+                player.shield=player.shield+100
             elseif powerups[i].type=="cup" then
                 game.score=game.score + 500
                 game.bonus=game.bonus +1
@@ -237,51 +240,140 @@ function draw_hud()
     local r, g, b, a
     r, g, b, a = love.graphics.getColor()
 
-    --local _now = love.timer.getTime()
-    local _speed_booster = player.speed_booster_powerup_expiration - now
-    local _rapid_fire = player.rapid_fire_powerup_expiration - now
+    -- set player background hub color
+    love.graphics.setColor(0, 0.1, 0.2, 1)
+    love.graphics.rectangle("fill", 0,0,hud_width,480) -- hud background
 
-    if _speed_booster < 0 then _speed_booster = 0 end
-    if _rapid_fire < 0 then _rapid_fire = 0 end
+    -- draw black
+    love.graphics.setColor(0,0,0,1)
+    love.graphics.rectangle("fill",hud_width/2-50, 37, 100, 14)
+    love.graphics.rectangle("fill",hud_width/2-50, 10, 100, 14)
+    love.graphics.rectangle("fill", hud_width/2-49, 93, 98, 14) -- draw score black box
+    love.graphics.rectangle("fill", hud_width/2-49, 120, 98, 14) -- draw score black box
 
-    -- draw score
-    love.graphics.print("Score: "..game.score, 10, 2)
 
-    -- draw speed boost timer
-    love.graphics.setColor(0,1,0,0.4) -- hud speed booster background
-    love.graphics.print("speed boost", 100, 2)
-    love.graphics.rectangle("fill", 100, 5, 100, 10)
-    love.graphics.rectangle("fill", 100, 5, 10*_speed_booster, 10)
+    -- lines and text color
+    love.graphics.setColor(0.4, 0.6, 0.8, 0.6)
+    love.graphics.line(hud_width, 0, hud_width, 480)
 
-    -- draw rapid fire timer
-    love.graphics.setColor(1,0,1,0.4) -- hud speed booster background
-    love.graphics.print("rapid fire", 220, 2)
-    love.graphics.rectangle("fill", 220, 5, 100, 10)
-    love.graphics.rectangle("fill", 220, 5, 10*_rapid_fire, 10)
+    -- level border and text
+    love.graphics.rectangle("line", hud_width/2-50, 93, 100, 14)
+    love.graphics.draw(
+        love.graphics.newText(
+            main_font,
+            "Level: "..game.level
+        ),
+        hud_width/2-46,
+        93
+    )
+
+    -- score border and text
+    love.graphics.rectangle("line", hud_width/2-50, 120, 100, 14)
+    love.graphics.draw(
+        love.graphics.newText(
+            main_font,
+            "Score: "..game.score
+        ),
+        hud_width/2-46,
+        120
+    )
+    -- draw some stats
+    --[[
+    love.graphics.print("player pos x: "..player.pos_x, 10, 30)
+    love.graphics.print("player pos y: "..player.pos_y, 10, 50)
+    love.graphics.print("pixelWidth: "..pixelWidth, 10, 70)
+    love.graphics.print("pixelHeight: "..pixelHeight, 10, 90)
+    love.graphics.print("getWidht: "..love.graphics.getWidth(), 10, 110)
+    love.graphics.print("getHeight: "..love.graphics.getHeight(), 10, 130)
+    love.graphics.print("canvas width: "..game_buffer:getWidth(), 10, 150)
+    love.graphics.print("canvas height: "..game_buffer:getHeight(), 10, 170)
+    ]]
+
+    --[[
+    -- calculate player healtch gauge color
+    love.graphics.setColor(
+        100-player.health,
+        player.health-20,
+        player.health-60, 
+        0.6
+    )
+    ]]
+
+    -- draw health gauge
+    love.graphics.rectangle("line", hud_width/2-50, 10, 100, 14)
+    love.graphics.draw(
+        love.graphics.newText(
+            main_font,
+            "Health: "..math.floor(player.health).."%"
+        ),
+        hud_width/2-46,
+        10
+    )
+    --[[
+    -- calculate player shield gauge color
+    love.graphics.setColor(
+        100 - player.shield,
+        player.shield-40,
+        0, 
+        0.4
+    )
+    ]]
+    -- draw shield gauge
+    love.graphics.rectangle("line", hud_width/2-50, 37, 100, 14)
+    love.graphics.draw(
+        love.graphics.newText(
+            main_font,
+            "Shield: "..math.floor(player.shield).."%"
+        ),
+        hud_width/2-46,
+        37
+    )
+
+    -- set color and draw colorful gauge bars
+    love.graphics.setColor(
+        100-player.health,
+        player.health-50,
+        0, 
+        0.5
+    )
+    love.graphics.rectangle("fill", hud_width/2-50, 10, player.health, 14)
+
+    love.graphics.setColor(
+        100 - player.shield,
+        player.shield-50,
+        0, 
+        0.5
+    )
+    love.graphics.rectangle("fill", hud_width/2-50, 37, player.shield, 14)
 
     -- restore colors
     love.graphics.setColor(r, g, b, a)
-
-    if game.over and (game.ended < now + 2) then -- check game.ended
-        
-        love.graphics.setFont(title_font)
-        love.graphics.print("Game Over", screenWidth/3.6, 200)
-        love.graphics.setFont(main_font)
-        love.graphics.print("Your score: "..game.score, screenWidth/2.4, 300)
-        love.graphics.print("MOUSE BUTTON or ESC to return to menu..",100, 500)
-    end
-
-    -- print screen and canvas size
-    --love.graphics.print("screenWidth: "..screenWidth, 10, 20)
-    --love.graphics.print("pixelWidth: "..love.graphics.getPixelWidth(), 10, 40)
-
-    love.graphics.print(levels.enemies, 10, 20)
-    
 end
 
 
 ----------------------------------------------------------
--- draw_game
+-- draw_fill
+----------------------------------------------------------
+function draw_fill()
+    -- save original colors
+    local r, g, b, a
+    r, g, b, a = love.graphics.getColor()
+
+    -- fill background color
+    love.graphics.setColor(0, 0.1, 0.2, 1)
+    love.graphics.rectangle("fill", 0,0,fill_width,480)
+
+    -- set player main fill color (same as hud)
+    love.graphics.setColor(0.2, 0.6, 1, 0.6)
+    love.graphics.line(0,0,0,480)
+
+    -- restore colors
+    love.graphics.setColor(r, g, b, a)
+end
+
+
+----------------------------------------------------------
+-- game_draw
 ----------------------------------------------------------
 function game_draw()
     if game.over == false then -- check game.ended
@@ -300,6 +392,12 @@ function game_draw()
 
         love.mouse.setVisible(false)
 
+    end
+    if game.over and (game.ended < now + 2) then -- check game.ended
+        local _game_over = love.graphics.newText(title_font, "Game Over")
+        love.graphics.draw(_game_over, (480-_game_over:getWidth())/2, 200)
+        local _score = love.graphics.newText(main_font, "Your score: "..game.score)
+        love.graphics.draw(_score, (480-_score:getWidth())/2, 300)
     end
 end
 

@@ -8,16 +8,17 @@ function player_init(selected_ship)
     player = {} -- new table/dict to hold player data and assign it to variable player
 
     player.dead = false
+    player.health = 100
     player.explosion = 0
     player.next_explosion = 0
-    player.pos_x = screenWidth
-    player.pos_y = screenHeight
+    player.pos_x = 240
+    player.pos_y = 240
     player.speed = 200 -- pixels per second used when keyboard controls player. Not used now.
     player.speed_booster_powerup_expiration=0 -- has no effect on game. Maybe change to slow down game speed?
     player.rapid_fire_powerup_expiration=0
-    player.shield = false
+    player.shield = 0 -- added to when collecting shield gems
     player.shield_image = love.graphics.newImage("assets/player_shield.png")
-    player.last_shot = love.timer.getTime()
+    player.last_shot = love.timer.getTime() -- needed for rate of fire calulation
     player.blasts = {}
 
     --[[
@@ -126,6 +127,7 @@ function player_shoot()
             blast.width = 8
             blast.height = 10
             blast.velocity = (math.random()*50)+300
+            blast.damage = (math.random()*50)+50
             table.insert(player.blasts, blast)
         end
         blast_sound:stop()
@@ -162,9 +164,12 @@ function player_update_blasts(dt)
                     player.blasts[i].pos_x < enemies[j].pos_x + enemies[j].width - enemies[j].collision_box[k][2] and
                     player.blasts[i].pos_y + player.blasts[i].height > enemies[j].pos_y + enemies[j].collision_box[k][3] and
                     player.blasts[i].pos_y < enemies[j].pos_y + enemies[j].height - enemies[j].collision_box[k][4] then
-                        enemies[j].dead = true
-                        game.kills = game.kills + 1
-                        game.score = game.score + enemies[j].points
+                        enemies[j].health = enemies[j].health - player.blasts[i].damage
+                        if enemies[j].health < 1 then
+                            enemies[j].dead = true
+                            game.kills = game.kills + 1
+                            game.score = game.score + enemies[j].points
+                        end
                         player_hit_sound:stop()
                         player_hit_sound:play()
                         table.insert(_remove_blasts, i)
@@ -213,13 +218,13 @@ function player_update(dt)
         -- correct player out of bounds
         if player.pos_x < 0 then
             player.pos_x = 0
-        elseif player.pos_x > screenWidth - 54 then
-            player.pos_x = screenWidth - 54
+        elseif player.pos_x > 480 - 54 then
+            player.pos_x = 480 - 54
         end
         if player.pos_y < 0 then
             player.pos_y = 0
-        elseif player.pos_y > screenHeight - 48 then
-            player.pos_y = screenHeight - 48
+        elseif player.pos_y > 480 - 48 then
+            player.pos_y = 480 - 48
         end
     
         -- check powerup expiration
@@ -250,16 +255,24 @@ end
 -------------------------------------------------------------------
 -- player hit
 -------------------------------------------------------------------
-function player_hit()   -- maybe add type of munitions player is hit with?
+function player_hit(b)   -- b is enemy blast that hit player
     -- todo
     player_hit_sound:stop()
     player_hit_sound:play()
 
-    if player.shield then
-        player.shield = false
+    if player.shield > 0 then
+        player.shield = player.shield - b.damage
+        if player.shield < 0 then
+            player.health = player.health + player.shield
+        end
     else
-        player.dead = true
+        player.health = player.health - b.damage
+        if player.health <= 0 then
+            player.dead = true
+        end
     end
+    if player.health < 0 then player.health = 0 end
+    if player.shield < 0 then player.shield = 0 end
 end
 
 
@@ -301,9 +314,26 @@ function player_draw()
         end
     else
         love.graphics.draw(player.image,player.pos_x,player.pos_y)
-        if player.shield == true then
+        if player.shield > 0 then
             love.graphics.draw(player.shield_image,player.pos_x-5,player.pos_y-1)
         end
+        -- draw health and shield gauges on player
+        -- moved to hud
+        --[[
+        love.graphics.setColor(
+            100 - player.health,
+            player.health - 50,
+            0, 
+            2
+        )
+        love.graphics.line(
+            player.pos_x,
+            player.pos_y + player.height + 5,
+            player.pos_x+player.health/5,
+            player.pos_y + player.height + 5
+        )
+        love.graphics.setColor(255,255,255,1)
+        ]]
     end
     
     for i=1,#player.blasts do

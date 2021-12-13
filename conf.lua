@@ -31,7 +31,7 @@ function love.conf(t)
     t.window.vsync = true
     t.window.width = 0                  -- Window width of 0 will use maximum monitor resolution
     t.window.height = 0                 --
-    -- use a canvas of 320*200 drawing all graphics to the canvas then blit canvas to screen with scaling.
+    -- use a canvas of 320*200 drawing all graphics to the canvas then draw canvas to screen with scaling.
     
     -- debugging
     t.console = true

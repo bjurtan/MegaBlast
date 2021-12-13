@@ -42,7 +42,7 @@ function new_enemy(enemy_type)
         direction_x = 0, -- 0=none, 1=right, -1=left
         next_direction = (math.random()*6+3), -- direction change time mark
         next_shot = (math.random()*3), -- shot time mark
-        pos_x = (math.random()*screenWidth), -- position on x plane
+        pos_x = (math.random()*480), -- position on x plane
         pos_y = -32,
         collision = false,
         dead = false,
@@ -51,6 +51,8 @@ function new_enemy(enemy_type)
     }
 
     if enemy_type == 1 then -- scout
+        _enemy.start_health = 100
+        _enemy.health = 100
         _enemy.speed = 80
         _enemy.rate_of_fire = 0.6
         _enemy.width = enemy1_img:getWidth()
@@ -58,6 +60,8 @@ function new_enemy(enemy_type)
         _enemy.points = 20
         _enemy.collision_box = {{14,14,3,0},{0,0,24,4}}
     elseif enemy_type == 2 then -- fighter
+        _enemy.start_health = 200
+        _enemy.health = 200
         _enemy.speed = 100
         _enemy.pos_y = -64
         _enemy.rate_of_fire = 0.4
@@ -66,6 +70,8 @@ function new_enemy(enemy_type)
         _enemy.points = 25
         _enemy.collision_box= {{7,7,20,40},{14,14,40,20},{20,20,50,4}}
     else -- megablast
+        _enemy.start_health = 600
+        _enemy.health = 600
         _enemy.speed = 50
         _enemy.pos_y = -64
         _enemy.rate_of_fire = 5
@@ -96,11 +102,13 @@ function enemy_shoot(enemy)
             _shot.image = enemy1_shot_img
             _shot.width = _shot.image:getWidth()
             _shot.height = _shot.image:getHeight()
+            _shot.damage = (math.random()*30)+40
         elseif enemy.type == 2 then
             _shot.velocity = (math.random()*50)+200*game.enemy_blast_velocity
             _shot.image = enemy1_shot_img
             _shot.width = _shot.image:getWidth()
             _shot.height = _shot.image:getHeight()
+            _shot.damage = (math.random()*50)+60
         end
 
         -- add _shot to enemy_blasts{}
@@ -129,7 +137,7 @@ function enemy_blasts_update(dt)
             enemy_blasts[i].pos_x < player.pos_x + player.width - player.collision_box[j][2] and
             enemy_blasts[i].pos_y + enemy_blasts[i].height > player.pos_y + player.collision_box[j][3] and
             enemy_blasts[i].pos_y < player.pos_y + player.height - player.collision_box[j][4] then
-                player_hit() -- handles stuff like shield power depletion and player death
+                player_hit(enemy_blasts[i]) -- handles stuff like shield power depletion and player death
                 table.insert(_enemy_blast_remove, i) -- remove enemy shot hitting player
             end
         end
@@ -169,7 +177,7 @@ function enemy_update(dt)
                     local _distance_y = math.abs(enemies[i].pos_y+enemies[i].height/2 - enemies[j].pos_y+enemies[j].height/2)
                     local _distance = math.abs(math.sqrt(_distance_x ^ 2 + _distance_y ^ 2))
                     if _distance < 128 then
-                        local middle_x, middle_y = screenWidth/2, screenHeight/2
+                        local middle_x, middle_y = 240, 240
                         local i_x = enemies[i].pos_x+enemies[i].width/2
                         local i_y = enemies[i].pos_y+enemies[i].height/2
                         local j_x = enemies[j].pos_x+enemies[j].width/2
@@ -181,14 +189,14 @@ function enemy_update(dt)
                                 enemies[i].direction_x = enemies[i].direction_x * -1
                                 enemies[i].direction_y = enemies[j].direction_y * -1
                                 enemies[i].collision = true
-                                print("collision: i="..i)
+                                --print("collision: i="..i)
                             end
                         else
                             if enemies[j].collision == false then
                                 enemies[j].direction_x = enemies[j].direction_x * -1
                                 enemies[j].direction_y = enemies[j].direction_y * -1
                                 enemies[j].collision = true
-                                print("collision: j="..j)
+                                --print("collision: j="..j)
                             end
                         end
                     else
@@ -204,13 +212,13 @@ function enemy_update(dt)
             -- check if enemy position is outside screen bounds on x axis
             if enemies[i].pos_x < 0 then
                 enemies[i].direction_x = 1
-            elseif enemies[i].pos_x + enemies[i].width > screenWidth then
+            elseif enemies[i].pos_x + enemies[i].width > 480 then
                 enemies[i].direction_x = -1
             end
             -- check if enemy position is outside of screen bounds on y axis
             if enemies[i].pos_y < 0 then
                 enemies[i].direction_y = 1
-            elseif enemies[i].pos_y + enemies[i].height > (screenHeight - screenHeight/3) then
+            elseif enemies[i].pos_y + enemies[i].height > (480 - 480/3) then
                 enemies[i].direction_y = -1
             end
             -- check if it is time for direction change
@@ -271,12 +279,30 @@ function enemy_draw(dt)
                     table.insert(_enemies_remove, i)
                 end
             else
-                -- love.graphics.draw(enemies[i].image, enemies[i].pos_x, enemies[i].pos_y)
+                -- enemy alive
                 if enemies[i].type == 1 then
                     love.graphics.draw(enemy1_img, enemies[i].pos_x, enemies[i].pos_y)
                 elseif enemies[i].type == 2 then
                     love.graphics.draw(enemy2_img, enemies[i].pos_x, enemies[i].pos_y)
                 end
+                -- draw enemy health gauge
+                local _hr = enemies[i].start_health / 20
+                local r, g, b, a
+                r, g, b, a = love.graphics.getColor()
+                love.graphics.setColor(
+                    enemies[i].start_health - enemies[i].health,
+                    enemies[i].health - enemies[i].start_health / 2,
+                    0, 
+                    2
+                )
+                love.graphics.rectangle(
+                    "fill",
+                    enemies[i].pos_x,
+                    enemies[i].pos_y-7,
+                    enemies[i].health/_hr,
+                    3
+                )
+                love.graphics.setColor(r,g,b,a)
             end
         end
         -- remove dead exploded enemies

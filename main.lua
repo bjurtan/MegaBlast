@@ -16,8 +16,6 @@ require "player"        -- player object, state variables and functions
 require "enemy"         -- enemy object, state variables and functions
 --require "shaders"       -- shader code to be sent to GPU and stuff
 
-buffer = love.graphics.newCanvas(screenWidth, screenHeight)
-
 local phong_shader = nil
 
 -------------------------------------------------------------------
@@ -26,6 +24,7 @@ local phong_shader = nil
 function love.keypressed(key)
     if key == 'escape' then
         if menu.active then
+            -- restore graphics first, the exit game
             love.event.push('quit')
         elseif game.over then
             menu.active=true
@@ -77,11 +76,22 @@ function love.load(arg)
     screenRatio = pixelWidth / pixelHeight
     screenHeight = 480
     
-    -- calculate screenWidth based on screenHeigh adn ration but make sure to round down to an even integer.
+    -- calculate screenWidth based on screenHeigh adn ratio but make sure to round down to an even integer.
     -- This is done by subtracting the modulus of height*ration and 2 from the actual height * ratio.
     screenWidth = screenHeight * screenRatio - (screenHeight * screenRatio % 2)
     screenScale = love.graphics.getHeight() / screenHeight
     
+    -- menu buffer takes up the whole screen
+    main_buffer = love.graphics.newCanvas(screenWidht, screenHeight)
+    -- game buffer is the area in the middle where game is drawn
+    game_buffer = love.graphics.newCanvas(480, 480)
+    -- hud buffer to the left for hud
+    hud_width = math.max((screenWidth-480)/2, 120)
+    hud_buffer  = love.graphics.newCanvas(hud_width, 480)
+    -- fiull buffer to the right to fill out rest of screen
+    fill_width = screenWidth-hud_width-480
+    fill_buffer = love.graphics.newCanvas(fill_width, 480)
+
     opening_music=love.audio.newSource("assets/ottos_rymdsong2.ogg", "static")
     opening_music:setLooping(true)
     love.audio.play(opening_music)
@@ -129,38 +139,46 @@ function love.draw(dt)
     -- the canvas screen is set to active canvas and the off-screen
     -- buffer is drawn to the screen.
     
-    love.graphics.setCanvas(buffer)
-    love.graphics.clear()
-    
     love.graphics.push()
-    love.graphics.scale(screenScale, screenScale)
+    love.graphics.setCanvas(main_buffer)
+    love.graphics.clear()
     
     starfield_draw(dt)
 
     if menu.active then
         menu_draw(dt)
     else
+        love.graphics.push()
+        love.graphics.setCanvas(game_buffer)
+        love.graphics.clear()
+
         --shader.apply()
         player_draw()
         enemy_draw()
         game_draw()
         --shader.remove()
+
+        love.graphics.setCanvas(hud_buffer)
+        love.graphics.clear()
         draw_hud()
 
+        love.graphics.setCanvas(fill_buffer)
+        love.graphics.clear()
+        draw_fill()
+
+        love.graphics.setCanvas(main_buffer)
+        love.graphics.pop()
+        love.graphics.draw(hud_buffer, 0, 0)
+        love.graphics.draw(game_buffer, hud_width, 0)
+        love.graphics.draw(fill_buffer, hud_width + 480, 0)
     end
 
-    -- draw screen resolution etc
-    love.graphics.print("Resolution: " .. love.graphics.getPixelWidth() .. "*" .. love.graphics.getPixelHeight() .. " | Scale: " .. screenScale .. " | Ratio: " .. screenRatio, 10, 20)
-    love.graphics.print("ScreenWidth: " .. screenWidth .. " ScreenHeight: " .. screenHeight, 10, 40)
-    if game.level then
-        love.graphics.print("Level: " .. game.level .. " Kills: " ..game.kills, 10, 70)
-        love.graphics.print("Player x: "..player.pos_x, 10, 80)
-        love.graphics.print("Player y: "..player.pos_y, 10, 90)
-    end
-
-    love.graphics.pop() -- Restore graphics after scaling
 
     love.graphics.setCanvas()
-    love.graphics.draw(buffer)
+    love.graphics.pop() -- Restore graphics after scaling
+
+    love.graphics.scale(screenScale, screenScale)
+    --love.graphics.draw(game_buffer, screenWidth - 640, 0)
+    love.graphics.draw(main_buffer)
 
 end
