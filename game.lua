@@ -112,6 +112,7 @@ function update_powerups(dt)
                 player.speed=player.speed*2
             elseif powerups[i].type=="shield" then
                 player.shield=player.shield+100
+                if player.shield > 100 then player.shield = 100 end
             elseif powerups[i].type=="cup" then
                 game.score=game.score + 500
                 game.bonus=game.bonus +1
