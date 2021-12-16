@@ -317,23 +317,6 @@ function player_draw()
         if player.shield > 0 then
             love.graphics.draw(player.shield_image,player.pos_x-5,player.pos_y-1)
         end
-        -- draw health and shield gauges on player
-        -- moved to hud
-        --[[
-        love.graphics.setColor(
-            100 - player.health,
-            player.health - 50,
-            0, 
-            2
-        )
-        love.graphics.line(
-            player.pos_x,
-            player.pos_y + player.height + 5,
-            player.pos_x+player.health/5,
-            player.pos_y + player.height + 5
-        )
-        love.graphics.setColor(255,255,255,1)
-        ]]
     end
     
     for i=1,#player.blasts do
