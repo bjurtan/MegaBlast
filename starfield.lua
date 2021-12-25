@@ -44,9 +44,9 @@ end
 
 
 function starfield_update(dt)
-    offsetLayer1 = (offsetLayer1 + 100 * dt) % screenWidth
-    offsetLayer2 = (offsetLayer2 + 150 * dt) % screenWidth
-    offsetLayer3 = (offsetLayer3 + 200 * dt) % screenWidth
+    offsetLayer1 = (offsetLayer1 + 50 * dt) % screenWidth
+    offsetLayer2 = (offsetLayer2 + 75 * dt) % screenWidth
+    offsetLayer3 = (offsetLayer3 + 100 * dt) % screenWidth
 end
 
 function starfield_draw(dt)

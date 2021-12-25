@@ -16,6 +16,7 @@ require "player"        -- player object, state variables and functions
 require "enemy"         -- enemy object, state variables and functions
 --require "shaders"       -- shader code to be sent to GPU and stuff
 
+
 local phong_shader = nil
 
 -------------------------------------------------------------------
