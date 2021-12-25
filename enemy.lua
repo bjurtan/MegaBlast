@@ -1,18 +1,24 @@
 -- FILE: enemy.lua
 
+require "enemy_scout"
+require "enemy_fighter"
+require "enemy_bomber"
+require "enemy_bomber"
+require "enemy_cruiser"
+require "enemy_megablast"
 
 
 --------------------------------------------------------------------------------
 -- enemy_init()
 --------------------------------------------------------------------------------
--- This function initialized enemy assets.
+-- This function initializes enemy assets.
 --------------------------------------------------------------------------------
 function enemy_init()
     
     enemies = {} -- enemies table
     enemy_blasts = {} -- enemy fire table
 
-    enemy1_img = love.graphics.newImage("assets/enemy1.png")
+    enemy1_img = love.graphics.newImage("assets/enemy_scout.png")
     enemy2_img = love.graphics.newImage("assets/enemy4.png")
 
     enemy1_shot_img = love.graphics.newImage("assets/enemy_blast.png")
@@ -34,51 +40,12 @@ end
 --------------------------------------------------------------------------------
 function new_enemy(enemy_type)
 
-    -- TODO: function decides enemy type inline
+    local _enemy
 
-    local _enemy = {
-        type = enemy_type,
-        direction_y = 1, -- 0=none, 1=down, -1=up
-        direction_x = 0, -- 0=none, 1=right, -1=left
-        next_direction = (math.random()*6+3), -- direction change time mark
-        next_shot = (math.random()*3), -- shot time mark
-        pos_x = (math.random()*480), -- position on x plane
-        pos_y = -32,
-        collision = false,
-        dead = false,
-        explosion = 0,
-        next_explosion = 0
-    }
-
-    if enemy_type == 1 then -- scout
-        _enemy.start_health = 100
-        _enemy.health = 100
-        _enemy.speed = 80
-        _enemy.rate_of_fire = 0.6
-        _enemy.width = enemy1_img:getWidth()
-        _enemy.height = enemy1_img:getHeight()
-        _enemy.points = 20
-        _enemy.collision_box = {{14,14,3,0},{0,0,24,4}}
-    elseif enemy_type == 2 then -- fighter
-        _enemy.start_health = 200
-        _enemy.health = 200
-        _enemy.speed = 100
-        _enemy.pos_y = -64
-        _enemy.rate_of_fire = 0.4
-        _enemy.width = enemy2_img:getWidth()
-        _enemy.height = enemy2_img:getHeight()
-        _enemy.points = 25
-        _enemy.collision_box= {{7,7,20,40},{14,14,40,20},{20,20,50,4}}
-    else -- megablast
-        _enemy.start_health = 600
-        _enemy.health = 600
-        _enemy.speed = 50
-        _enemy.pos_y = -64
-        _enemy.rate_of_fire = 5
-        _enemy.width = enemy5_img:getWidth()
-        _enemy.height = enemy5_img:getHeight()
-        _enemy.points = 400
-        _enemy.collision_box= {{7,7,20,40},{14,14,40,20},{20,20,50,4}}
+    if enemy_type == 1 then
+        _enemy = new_enemy_scout(enemy_type)
+    elseif enemy_type == 2 then
+        _enemy = new_enemy_fighter(enemy_type)
     end
 
     return _enemy
@@ -187,16 +154,14 @@ function enemy_update(dt)
                         if dis_i > dis_j then
                             if enemies[i].collision == false then
                                 enemies[i].direction_x = enemies[i].direction_x * -1
-                                enemies[i].direction_y = enemies[j].direction_y * -1
+                                --enemies[i].direction_y = enemies[j].direction_y * -1
                                 enemies[i].collision = true
-                                --print("collision: i="..i)
                             end
                         else
                             if enemies[j].collision == false then
                                 enemies[j].direction_x = enemies[j].direction_x * -1
-                                enemies[j].direction_y = enemies[j].direction_y * -1
+                                --enemies[j].direction_y = enemies[j].direction_y * -1
                                 enemies[j].collision = true
-                                --print("collision: j="..j)
                             end
                         end
                     else
@@ -218,16 +183,17 @@ function enemy_update(dt)
             -- check if enemy position is outside of screen bounds on y axis
             if enemies[i].pos_y < 0 then
                 enemies[i].direction_y = 1
-            elseif enemies[i].pos_y + enemies[i].height > (480 - 480/3) then
-                enemies[i].direction_y = -1
+            elseif enemies[i].pos_y > (480) then
+                --enemies[i].direction_y = -1
+                if enemies[i].dead == false then
+                    game.danger = game.danger + 1
+                    enemies[i].dead = true
+                end
             end
             -- check if it is time for direction change
             if enemies[i].next_direction < now then
-                --math.randomseed(os.time())
-                --enemies[i].direction_x = love.math.random(-1, 1)
-                --enemies[i].direction_y = love.math.random(-1, 1)
-                enemies[i].direction_x = math.random()*2-1
-                enemies[i].direction_y = math.random()*2-1
+                enemies[i].direction_x = ((math.random()*2)-1)*0.5
+                enemies[i].direction_y = (math.random()*2)+2
                 enemies[i].next_direction = love.timer.getTime() + (math.random()*6+6)
             end
             -- update position

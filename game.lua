@@ -33,6 +33,7 @@ function game_init()
         score=0,
         level=1,
         kills=0,
+        danger=0,
         bonus=0,
         enemy_spawn=3,          -- remove and use enemy types per level
         enemy_speed=1,          -- enemy speed factor used to make all enemies move faster as game progresses
@@ -40,7 +41,7 @@ function game_init()
         enemy_blast_velocity=1, -- enemy show velocity factor used t make all enemy shots move faster
         next_enemy=0,
         next_enemy_type=1,      -- 1=scout, 2=fighter, 3=bomber, 4=cruiser, 5=megablaster
-        max_enemies=10,
+        max_enemies=5,
         next_difficulty=1,
         next_rf_powerup=love.timer.getTime()+(math.random()*40+40), -- rapid fire powerup
         next_sb_powerup=love.timer.getTime()+(math.random()*40+40), -- speed boost powerup
@@ -149,23 +150,18 @@ function game_update(dt)
         -- check if it is time to progress levels
         level_update()
 
+        -- check if danger level (missed enemies) is 5 yet..
+        if game.danger < 5 then -- do nothing
+        else
+            player.dead = true
+        end
+
         -- check number of enemies to maximum
         --if #enemies < game.max_enemies then
         if #enemies < game.max_enemies then
             if now > game.next_enemy then
 
                 -- TODO: Move this code to levels.lua and call from here
-
-                -- decide what type of enemy based on score, randomness etc
-                -- then spawn new enemy and insert in enemies table/list
-                --[[if game.score > 100 then
-                    local _enemy_type = math.random()*2
-                    if _enemy_type < 1.5 then
-                        game.next_enemy_type = 1
-                    else
-                        game.next_enemy_type = 2
-                    end
-                end ]]
                 local _enemy = math.random() * levels.enemies
                 if _enemy < 10 and _enemy > 0 then
                     _enemy = 1
