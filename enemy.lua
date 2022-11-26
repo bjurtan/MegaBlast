@@ -186,8 +186,9 @@ function enemy_update(dt)
             elseif enemies[i].pos_y > (480) then
                 --enemies[i].direction_y = -1
                 if enemies[i].dead == false then
-                    game.danger = game.danger + 1
-                    enemies[i].dead = true
+                    --game.danger = game.danger + 1
+                    --enemies[i].dead = true
+                    enemies[i].pos_y = 0 - enemies[i].height
                 end
             end
             -- check if it is time for direction change

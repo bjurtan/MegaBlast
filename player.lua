@@ -12,7 +12,7 @@ function player_init(selected_ship)
     player.explosion = 0
     player.next_explosion = 0
     player.pos_x = 240
-    player.pos_y = 240
+    player.pos_y = 340
     player.speed = 200 -- pixels per second used when keyboard controls player. Not used now.
     player.speed_booster_powerup_expiration=0 -- has no effect on game. Maybe change to slow down game speed?
     player.rapid_fire_powerup_expiration=0
@@ -67,7 +67,7 @@ function player_init(selected_ship)
     -- uses explosion1-4 from enemy.lua
 
     -- move mouse cursor->player ship to starting position
-    love.mouse.setPosition(player.pos_x, player.pos_y)
+    love.mouse.setPosition(player.pos_x*screenScale+54, player.pos_y*screenScale+48)
     
 end
 
@@ -220,13 +220,17 @@ function player_update(dt)
             player.pos_x = 0
         elseif player.pos_x > 480 - 54 then
             player.pos_x = 480 - 54
+            -- correct mouse position
+            love.mouse.setX(480 * screenScale - 54)
         end
         if player.pos_y < 0 then
             player.pos_y = 0
+            love.mouse.setY(48*screenScale)
         elseif player.pos_y > 480 - 48 then
             player.pos_y = 480 - 48
+            love.mouse.setY(480 * screenScale - 48)
         end
-    
+        
         -- check powerup expiration
         if player.rapid_fire_powerup_expiration~=0 and player.rapid_fire_powerup_expiration < now then
             -- rapid fire powerup has expired
@@ -314,6 +318,7 @@ function player_draw()
         end
     else
         love.graphics.draw(player.image,player.pos_x,player.pos_y)
+        love.graphics.print(screenScale, player.pos_x, player.pos_y)
         if player.shield > 0 then
             love.graphics.draw(player.shield_image,player.pos_x-5,player.pos_y-1)
         end

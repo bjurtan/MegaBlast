@@ -1,6 +1,10 @@
 # PikoPixel assets (.piko)
 # *.piko
 
+# ignore contents of releases folder (but keep the folder itseld)
+releases/*
+!releases/.gitkeep
+
 # Compiled Lua sources
 luac.out
 
