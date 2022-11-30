@@ -25,8 +25,9 @@ function love.conf(t)
     t.window.title = "MegaBlast!"         -- Set window title
     t.window.icon = "assets/player2.png"  -- Find out how to set window icon
     t.window.resizable = false            -- Window should not be resizeable
-    t.window.fullscreen = false           -- We use scaling and maximized window
-    t.window.fullscreentype = "exclusive" -- desktop/exclusive mode
+    t.window.fullscreen = true           -- We use scaling and maximized window
+    --t.window.fullscreentype = "exclusive" -- desktop/exclusive mode
+    t.window.fullscreentype = "desktop"
     t.window.highdpi = false              -- Retina on Mac. Allways true on android?
     t.window.vsync = true
     t.window.width = 0                    -- Window width of 0 will use maximum monitor resolution

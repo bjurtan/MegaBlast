@@ -14,8 +14,8 @@ function menu_init()
     menu = {
         active = true,
         title = "MEGABLAST",
-        description = "A galactic space shooter game by F.O.B (c) 2020 Frans, Otto & Björn",
-        text = "The earth is under attack! Man the Raptor and save the world. Best of luck out there starpilot..",
+        description = "A galactic space shooter game by FOB",
+        text = "The earth is under attack! Man the Raptor and save the world. Good luck out there pilot!",
         --text = "The Raptor is your trusty ship. Its fast, agile and LETHAL! Best of luck out there pilot..",
         selected = 1,
         ships = {
@@ -65,7 +65,7 @@ function menu_init()
     }
 
     title_font = love.graphics.newFont("assets/Audiowide-Regular.ttf", 60, "light")
-    main_font = love.graphics.newFont("assets/Audiowide-Regular.ttf", 12, "light")
+    main_font = love.graphics.newFont("assets/Audiowide-Regular.ttf", 14, "normal")
 
 end
 

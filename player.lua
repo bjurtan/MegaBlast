@@ -318,7 +318,8 @@ function player_draw()
         end
     else
         love.graphics.draw(player.image,player.pos_x,player.pos_y)
-        love.graphics.print(screenScale, player.pos_x, player.pos_y)
+        -- to print some variable at player position
+        --love.graphics.print(screenScale, player.pos_x, player.pos_y)
         if player.shield > 0 then
             love.graphics.draw(player.shield_image,player.pos_x-5,player.pos_y-1)
         end
